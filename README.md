@@ -41,7 +41,7 @@ The things you don't get:
 
 ## Usage
 
-Either build your own or use the prebuilt JS files from the dist folder. Create your own or use the pre-made building blocks and call render({}) with the related template params. I will expand this part more in the future to give you better examples till then take a look at the examples page
+Either build your own or use the prebuilt JS files from the dist folder. Create your own or use the pre-made building blocks and call render() with the related template params. I'll expand on this section in the future to provide more examples, but in the meantime, check out the examples page.
 
 ### Building blocks
 

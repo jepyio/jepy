@@ -13,7 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Examples for each block in the README "Usage" block
+- Examples for each block in the README "Usage" section
+
+### Fixed
+
+- Grammar in the "Usage" section
 
 ## [1.0.0] - 2023-03-26
 
