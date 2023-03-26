@@ -1,9 +1,4 @@
 <a name="readme-top"></a>
-
-[![Issues][issues-shield]][https://github.com/jepyio/jepy/issues]
-[![MIT License][license-shield]][https://github.com/jepyio/jepy/blob/main/LICENSE]
-
-<br />
 <div align="center">
   <a href="https://github.com/jepyio/jepy">
     <img src="images/logo.svg" alt="Logo" height="80">
