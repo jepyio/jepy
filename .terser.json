@@ -1,0 +1,13 @@
+{
+    "parse": {},
+    "compress": {
+        "drop_console": true
+    },
+    "mangle": {
+        "properties": {
+            "regex": "^_[^_]"
+        }
+    },
+    "sourceMap": true,
+    "ecma": 8
+}

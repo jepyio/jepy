@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <script src="jepy.min.js"></script>
+        <style>
+            body {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 14px;
+            }
+            .my_8 {
+                margin-top: 8px;
+                margin-bottom: 8px;
+            }
+            .ml_4 {
+                margin-left: 4px;
+            }
+            .ml_8 {
+                margin-left: 8px;
+            }
+            .mt_4 {
+                margin-top: 4px;
+            }
+            .mt_8 {
+                margin-top: 8px;
+            }
+            .mt_16 {
+                margin-top: 14px;
+            }
+            .p_16 {
+                padding: 14px;
+            }
+            .flex_row {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+            }
+            .bg_slate-10 {
+                background-color: #e5e9f1;
+            }
+            .bg_slate-30 {
+                background-color: #b2bed5;
+            }
+            .rounded_8 {
+                border-radius: 8px;
+            }
+            .status_out-of-stock {
+                height: 12px;
+                width: 12px;
+                color: #fff;
+                background-color: rgb(221, 62, 62);
+                border-radius: 50%;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Examples</h1>
+        <h2>Random joke</h2>
+        <div class="js-random-joke-example-one p_16 bg_slate-10 rounded_8"></div>
+        <div class="js-random-joke-example-two mt_16 p_16 bg_slate-10 rounded_8"></div>
+        <h2>Basket</h2>
+        <div class="js-basket-example-one p_16 bg_slate-10 rounded_8"></div>
+        <div class="js-basket-example-two p_16 mt_16 bg_slate-10 rounded_8"></div>
+        <div class="js-basket-example-three p_16 mt_16 bg_slate-10 rounded_8"></div>
+        <script>
+            const helloMessageBlock = new jepy.Placeholder('<div>Hi ${user.name}!</div>');
+            const containerBlock = (contentBlock) => {
+                return new jepy.Composite([
+                    new jepy.Simple('<div class="mt_16 p_16 bg_slate-30 rounded_8">'),
+                    contentBlock,
+                    new jepy.Simple('</div>')
+                ]);
+            };
+            const randomJokeExample = new jepy.Composite([
+                helloMessageBlock,
+                containerBlock(
+                    new jepy.Conditional(
+                        (params) => params.jokes.length > 0,
+                        new jepy.Composite([
+                            new jepy.Placeholder('<div>Here is your random joke:</div>'),
+                            new jepy.Placeholder(
+                                '<div><strong>@{randomJoke}</strong></div>',
+                                {
+                                    randomJoke: (params) => {
+                                        const jokes = params.jokes;
+                                        const index = Math.floor(Math.random() * jokes.length);
+                                        return jokes[index];
+                                    }
+                                }
+                            )
+                        ]),
+                        new jepy.Simple('<div>Sorry, I\'m out of jokes at the moment</div>')
+                    )
+                )
+            ]);
+            document.querySelector('.js-random-joke-example-one').innerHTML = randomJokeExample.render({
+                user: {
+                    name: 'Mary'
+                },
+                jokes: []
+            });
+            document.querySelector('.js-random-joke-example-two').innerHTML = randomJokeExample.render({
+                user: {
+                    name: 'Brian'
+                },
+                jokes: [
+                    'Never trust atoms; they make up everything.',
+                    'Blunt pencils are really pointless.',
+                    'Whiteboards are remarkable.',
+                    'If you don\'t pay your exorcist, do you get repossessed?'
+                ]
+            });
+            const singularOrPlural = (noun, counter) => (counter > 1 ? noun + 's' : noun);
+            const basketExample = new jepy.Composite([
+                helloMessageBlock,
+                containerBlock(
+                    new jepy.Conditional(
+                        (params) => params.items.length > 0,
+                        new jepy.Composite([
+                            new jepy.Placeholder(
+                                '<div class="my_8">You have <strong>@{numberOfItems} @{itemText}</strong> in your basket</div>',
+                                {
+                                    numberOfItems: (params) => params.items.length,
+                                    itemText: (params) => singularOrPlural('item', params.items.length)
+                                }
+                            ),
+                            new jepy.Simple('<div class="ml_8">'),
+                            new jepy.Repeating(
+                                'items',
+                                new jepy.Placeholder(
+                                    '<li class="flex_row mt_4"><a href="${url}">${text}</a>@{status}</li>', 
+                                    {
+                                        status: (params) =>
+                                            params.outOfStock ? '<div class="status_out-of-stock ml_4" title="Out of stock"></div>' : ''
+                                    }
+                                )
+                            ),
+                            new jepy.Simple('</div>')
+                        ]),
+                        new jepy.Simple('<div>Your basket is empty</div>')
+                    )
+                )
+            ]);
+            document.querySelector('.js-basket-example-one').innerHTML = basketExample.render({
+                user: {
+                    name: 'Mary'
+                },
+                items: [
+                    {
+                        url: 'item/3',
+                        text: 'A4 Paper',
+                        outOfStock: false
+                    }
+                ]
+            });
+            document.querySelector('.js-basket-example-two').innerHTML = basketExample.render({
+                user: {
+                    name: 'Adam'
+                },
+                items: [
+                    {
+                        url: 'item/1',
+                        text: 'Pencil',
+                        outOfStock: false
+                    },
+                    {
+                        url: 'item/2',
+                        text: 'Pen',
+                        outOfStock: true
+                    }
+                ]
+            });
+            document.querySelector('.js-basket-example-three').innerHTML = basketExample.render({
+                user: {
+                    name: 'Brian'
+                },
+                items: []
+            });
+        </script>
+    </body>
+</html>
