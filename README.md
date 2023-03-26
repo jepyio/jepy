@@ -1,10 +1,7 @@
 <a name="readme-top"></a>
 
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
+[![Issues][issues-shield]][https://github.com/jepyio/jepy/issues]
+[![MIT License][license-shield]][https://github.com/jepyio/jepy/blob/main/LICENSE]
 
 <br />
 <div align="center">
