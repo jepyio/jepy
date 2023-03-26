@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Optional parser to generate and cache blocks based on a simple template format 
 
+## [1.0.1] - 2023-03-26
+
+### Added
+
+- Examples for each block in the README "Usage" block
+
 ## [1.0.0] - 2023-03-26
 
 ### Added
