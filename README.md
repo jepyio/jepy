@@ -47,23 +47,98 @@ Either build your own or use the prebuilt JS files from the dist folder. Create 
 
 #### jepy.Simple
 
-It could be used to return simple text or html elements
+It could be used to return a simple string
+
+```javascript
+const simpleBlock = new jepy.Simple('<div>Hello World</div>');
+simpleBlock.render(); 
+// output: <div>Hello World</div>
+```
 
 #### jepy.Placeholder
 
-This is to return text or html elements with escaped and raw values or add a "partial" placeholder to execute a function on the parameters
+This is to return a string with escaped and raw values or add a "partial" placeholder to execute a function on the parameters
+
+```javascript
+const placeholderBlock = new jepy.Placeholder('<div>Hello ${who}</div>');
+placeholderBlock.render({
+    who: 'World'
+});
+// output: <div>Hello World</div>
+```
 
 #### jepy.Conditional
 
-It is used to return Blocks based on a function return. This is your "if ... else ..." building block
+It is used to return Blocks based on the condition function return. This is your "if ... else ..." building block
+
+```javascript
+const conditionalBlock = new jepy.Conditional(
+    (params) => params.who !== undefined,
+    new jepy.Placeholder('<div>Hello ${who}</div>'),
+    new jepy.Simple('<div>Hi</div>')
+);
+conditionalBlock.render();
+// output: <div>Hi</div>
+
+conditionalBlock.render({
+    who: 'World'
+});
+// output: <div>Hello World</div>
+```
 
 #### jepy.Repeating
 
-This is to return repeating text or html elements based on an array parameter. This is your "foreach ..." building block
+This is to return repeating strings based on an array parameter. This is your "foreach ..." building block
+
+```javascript
+const repeatingBlock = new jepy.Repeating(
+    'items',
+    new jepy.Placeholder('<div>#${id} ${name}</div>')
+);
+repeatingBlock.render({
+    items: [
+        {
+            id: 1,
+            name: 'first'
+        },
+        {
+            id: 2,
+            name: 'second'
+        }
+    ]
+});
+// output: <div>#1 first</div><div>#2 second</div>
+```
 
 #### jepy.Composite
 
 This is used to stich together multiple Blocks into one
+
+```javascript
+const compositeBlock = new jepy.Composite([
+    new jepy.Simple('<div>'),
+    new jepy.Placeholder('<div>Hello ${who}</div>'),
+    new jepy.Repeating(
+        'items',
+        new jepy.Placeholder('<div>#${id} ${name}</div>')
+    ),
+    new jepy.Simple('</div>'),
+]);
+compositeBlock.render({
+    who: 'World',
+    items: [
+        {
+            id: 1,
+            name: 'first'
+        },
+        {
+            id: 2,
+            name: 'second'
+        }
+    ]
+});
+// output: <div><div>Hello World</div><div>#1 first</div><div>#2 second</div></div>
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
