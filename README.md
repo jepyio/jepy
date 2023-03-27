@@ -38,7 +38,7 @@ The things you don't get:
 * It does not work with IE11 and older non-Chrome based Edge "Legacy" (requires matchAll support), which I do not consider a disadvantage, but you may. Since Microsoft has already stopped supporting [IE11](https://learn.microsoft.com/en-us/lifecycle/products/internet-explorer-11) and non-Chrome based [Edge "Legacy"](https://learn.microsoft.com/en-us/lifecycle/products/microsoft-edge-legacy) and there have been considerable updates over the past few years, I would prefer not to change this. Request it as a feature if it's a deal-breaker, and I'll give it some thought.
 
 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/matchAll">
-    <img src="images/browser-support.png" alt="Browser support" height="300">
+    <img src="images/browser-support.png" alt="Browser support">
 </a>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
