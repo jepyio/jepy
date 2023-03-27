@@ -41,7 +41,7 @@ The things you don't get:
 
 ## Usage
 
-Build your own or use the "dist" folder's prebuilt JavaScript file. To create your templates, you can use the following building blocks from this section. I'll add more examples to this section in the future, but for now, check out the examples page if you want to see how these are used.
+Build your own, use the "dist" folder's prebuilt JavaScript file or add the following to your page `<script src="https://cdn.jsdelivr.net/gh/jepyio/jepy/dist/jepy.min.js"></script>`. To create your templates, you can use the following building blocks from this section. I'll add more examples to this section in the future, but for now, check out the examples page if you want to see how these are used.
 
 ### Building blocks
 
