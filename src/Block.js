@@ -4,7 +4,9 @@
 class Block {
     /**
      * @abstract
-     * @private {function}
+     * @public
+     * @function
+     * @param {Object} params
      * @return {String}
      */
     render() {}

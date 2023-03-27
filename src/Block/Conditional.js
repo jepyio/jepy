@@ -13,7 +13,7 @@ class Conditional extends Block {
         super();
         /**
          * @type {function}
-         * @param {*} params
+         * @param {Object} params
          */
         this.conditionCallback_ = conditionCallback;
         /** @type {Block} */

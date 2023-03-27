@@ -11,7 +11,7 @@ class Callback extends Block {
         super();
         /**
          * @type {function}
-         * @param {*} params
+         * @param {Object} params
          */
         this.renderCallback_ = renderCallback;
     }

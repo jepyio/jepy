@@ -19,7 +19,7 @@ class Repeating extends Block {
         /**
          * @type {function}
          * @param {*} item
-         * @param {*} params
+         * @param {Object} params
          */
         this.callback_ = callback;
     }

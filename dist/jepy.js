@@ -7,7 +7,9 @@ var jepy = (function () {
     class Block {
         /**
          * @abstract
-         * @private {function}
+         * @public
+         * @function
+         * @param {Object} params
          * @return {String}
          */
         render() {}
@@ -51,7 +53,7 @@ var jepy = (function () {
             super();
             /**
              * @type {function}
-             * @param {*} params
+             * @param {Object} params
              */
             this.conditionCallback_ = conditionCallback;
             /** @type {Block} */
@@ -198,7 +200,7 @@ var jepy = (function () {
             /**
              * @type {function}
              * @param {*} item
-             * @param {*} params
+             * @param {Object} params
              */
             this.callback_ = callback;
         }
@@ -255,7 +257,7 @@ var jepy = (function () {
             super();
             /**
              * @type {function}
-             * @param {*} params
+             * @param {Object} params
              */
             this.renderCallback_ = renderCallback;
         }
