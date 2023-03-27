@@ -57,14 +57,43 @@ simpleBlock.render();
 
 #### jepy.Placeholder
 
-This is to return a string with escaped and raw values or add a "partial" placeholder to execute a function on the parameters
+This is to return a string with escaped and raw values or add partials to insert a text, Block or execute a function on the parameters
+
+##### jepy.Placeholder with raw value
 
 ```javascript
-const placeholderBlock = new jepy.Placeholder('<div>Hello ${who}</div>');
+const placeholderBlock = new jepy.Placeholder('<div>%{text}</div>');
 placeholderBlock.render({
-    who: 'World'
+    text: '<img src="test.jpg">'
 });
-// output: <div>Hello World</div>
+// output: <div><img src="test.jpg"></div>
+```
+
+##### jepy.Placeholder with escaped value
+
+```javascript
+const placeholderBlock = new jepy.Placeholder('<div>${text}</div>');
+placeholderBlock.render({
+    text: '<img src="test.jpg">'
+});
+// output: <div>&#60;img src=&#34;test.jpg&#34;&#62;</div>
+```
+
+##### jepy.Placeholder with partials
+
+```javascript
+const placeholderBlock = new jepy.Placeholder(
+    '@{partialOne}@{partialTwo}@{partialThree}',
+    {
+        partialOne: '<img ',
+        partialTwo: new jepy.Placeholder('src="${imageUrl}"'),
+        partialThree: () => '>'
+    }
+);
+placeholderBlock.render({
+    imageUrl: 'test.jpg'
+});
+// output: <img src="test.jpg">
 ```
 
 #### jepy.Conditional
