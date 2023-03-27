@@ -35,7 +35,11 @@ Here is what you get:
 * You can use the Block interface to expand it for your needs
 
 The things you don't get:
-* It does not work with browser versions older than 2020 (requires matchAll support), which I do not consider a disadvantage, but you may. Since Microsoft has already stopped supporting IE11 and non-Chrome based Edge and there have been considerable updates over the past few years, I would prefer not to change this. Request it as a feature if it's a deal-breaker, and I'll give it some thought.
+* It does not work with IE11 and older non-Chrome based Edge (requires matchAll support), which I do not consider a disadvantage, but you may. Since Microsoft has already stopped supporting IE11 and non-Chrome based Edge and there have been considerable updates over the past few years, I would prefer not to change this. Request it as a feature if it's a deal-breaker, and I'll give it some thought.
+
+<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/matchAll">
+    <img src="images/browser-support.png" alt="Logo" height="80">
+</a>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
