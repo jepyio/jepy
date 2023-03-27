@@ -244,12 +244,41 @@ var jepy = (function () {
         }
     }
 
+    /**
+     * @implements {Block}
+     */
+    class Callback extends Block {
+        /**
+         * @param {function} renderCallback
+         */
+        constructor(renderCallback) {
+            super();
+            /**
+             * @type {function}
+             * @param {*} params
+             */
+            this.renderCallback_ = renderCallback;
+        }
+
+        /**
+         * @override
+         * @public
+         * @function
+         * @param {Object} params
+         * @return {String}
+         */
+        render(params) {
+            return this.renderCallback_(params);
+        }
+    }
+
     const jepy = {
         Composite,
         Conditional,
         Placeholder,
         Repeating,
-        Simple
+        Simple,
+        Callback
     };
 
     return jepy;

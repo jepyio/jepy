@@ -5,7 +5,7 @@
     },
     "mangle": {
         "properties": {
-            "regex": "^_[^_]"
+            "regex": "_$"
         }
     },
     "sourceMap": true,

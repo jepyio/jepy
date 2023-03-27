@@ -211,3 +211,34 @@ describe('test complex block chain', function () {
         );
     });
 });
+describe('test callback block', function () {
+    it('should return the simple string from the block', function () {
+        const block = new jepy.Callback(() => 'hello world');
+        assert.equal(block.render(), 'hello world');
+    });
+    it('should return the generated string from the block', function () {
+        const block = new jepy.Callback((params) => {
+            const itemCount = params.items.length;
+            const singularOrPlural = (noun, counter) => (counter > 1 ? noun + 's' : noun);
+            const basketBlock = new jepy.Placeholder(
+                '<div>You have ${itemCount} ${itemText} in your basket</div>'
+            );
+            return basketBlock.render({
+                itemCount: itemCount,
+                itemText: singularOrPlural('item', itemCount)
+            });
+        });
+        assert.equal(
+            block.render({
+                items: [1]
+            }),
+            '<div>You have 1 item in your basket</div>'
+        );
+        assert.equal(
+            block.render({
+                items: [1, 2, 3]
+            }),
+            '<div>You have 3 items in your basket</div>'
+        );
+    });
+});

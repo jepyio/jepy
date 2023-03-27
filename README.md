@@ -30,7 +30,7 @@
 There are several amazing JS template engines out there, but most of them require multiple dependencies or must be pre-built. I wanted something tiny, reusable, and capable of rendering in real time with good performance. Hopefully, jepy will meet all of these goals and prove to be an useful tool for your projects too!
 
 Here is what you get:
-* It is only ~2KB minimised
+* It is only ~1KB minimised
 * This will give you everything you need to make templates that are reusable and easy to expand
 * You can use the Block interface to expand it for your needs
 
@@ -41,7 +41,7 @@ The things you don't get:
 
 ## Usage
 
-Either build your own or use the prebuilt JS files from the dist folder. Create your own or use the pre-made building blocks and call render() with the related template params. I'll expand on this section in the future to provide more examples, but in the meantime, check out the examples page.
+Build your own or use the "dist" folder's prebuilt JavaScript file. To create your templates, you can use the following building blocks from this section. I'll add more examples to this section in the future, but for now, check out the examples page if you want to see how these are used.
 
 ### Building blocks
 
@@ -140,6 +140,31 @@ compositeBlock.render({
 // output: <div><div>Hello World</div><div>#1 first</div><div>#2 second</div></div>
 ```
 
+#### jepy.Callback
+
+Use this if you want something with complicated logic that is also self-contained. This will return the text produced by the callback function that was passed on initialisation.
+
+```javascript
+const callbackBlock = new jepy.Callback((params) => {
+    const itemCount = params.items.length;
+    const singularOrPlural = (noun, counter) => (counter > 1 ? noun + 's' : noun);
+    const basketBlock = new jepy.Placeholder(
+        '<div>You have ${itemCount} ${itemText} in your basket</div>'
+    );
+    return basketBlock.render({
+        itemCount: itemCount,
+        itemText: singularOrPlural('item', itemCount)
+    });
+});
+callbackBlock.render({
+    items: [
+        'pineapple',
+        'pen'
+    ]
+});
+// output: <div>You have 2 items in your basket</div>
+```
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Roadmap
@@ -154,10 +179,7 @@ See the [open issues](https://github.com/jepyio/jepy/issues) for a full list of 
 
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
+Your support is **greatly appreciated**! If you have ideas for enhancements, please fork the repository and submit a pull request to the "development" branch. Remember to execute "npm run test" before committing to ensure that everything is still working! You can alternatively create a new issue with the tag "enhancement". Don't forget to star the project! Thank you once more!
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

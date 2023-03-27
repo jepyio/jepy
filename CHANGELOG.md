@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Optional parser to generate and cache blocks based on a simple template format 
 
+## [1.1.0] - 2023-03-27
+
+### Added
+
+- The Callback block for more complex use cases. This will return the text produced by the callback function that was passed on initialisation
+
+### Fixed
+
+- Terser regex setting to the format to mangle private properties
+
 ## [1.0.1] - 2023-03-26
 
 ### Added
