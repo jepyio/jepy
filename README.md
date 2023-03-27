@@ -30,12 +30,12 @@
 There are several amazing JS template engines out there, but most of them require multiple dependencies or must be pre-built. I wanted something tiny, reusable, and capable of rendering in real time with good performance. Hopefully, jepy will meet all of these goals and prove to be an useful tool for your projects too!
 
 Here is what you get:
-* It is only ~1KB minimised
+* It is less than 2KB minimised
 * This will give you everything you need to make templates that are reusable and easy to expand
 * You can use the Block interface to expand it for your needs
 
 The things you don't get:
-* It does not work with IE11 and older non-Chrome based Edge "Legacy" (requires matchAll support), which I do not consider a disadvantage, but you may. Since Microsoft has already stopped supporting [IE11](https://learn.microsoft.com/en-us/lifecycle/products/internet-explorer-11) and non-Chrome based [Edge "Legacy"](https://learn.microsoft.com/en-us/lifecycle/products/microsoft-edge-legacy) and there have been considerable updates over the past few years, I would prefer not to change this. Request it as a feature if it's a deal-breaker, and I'll give it some thought.
+* It does not work with IE11 (it is based on [classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)) and older non-Chrome based Edge "Legacy" (requires [matchAll](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/matchAll) support that you can solve with polyfill), which I do not consider a disadvantage, but you may. Since Microsoft has already stopped supporting [IE11](https://learn.microsoft.com/en-us/lifecycle/products/internet-explorer-11) and non-Chrome based [Edge "Legacy"](https://learn.microsoft.com/en-us/lifecycle/products/microsoft-edge-legacy) and there have been considerable updates over the past few years, I would prefer not to change this. Request it as a feature if it's a deal-breaker, and I'll give it some thought.
 
 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/matchAll">
     <img src="images/browser-support.png" alt="Browser support">
