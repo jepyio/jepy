@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - The Callback block for more complex use cases. This will return the text produced by the callback function that was passed on initialisation
+- More examples for the README usage section
 
 ### Fixed
 
