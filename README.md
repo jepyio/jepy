@@ -35,11 +35,10 @@ Here is what you get:
 * You can use the Block interface to expand it for your needs
 
 The things you don't get:
-* It does not work with IE11 (it is based on [classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)) and older non-Chrome based Edge "Legacy" (requires [matchAll](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/matchAll) support that you can solve with polyfill), which I do not consider a disadvantage, but you may. Since Microsoft has already stopped supporting [IE11](https://learn.microsoft.com/en-us/lifecycle/products/internet-explorer-11) and non-Chrome based [Edge "Legacy"](https://learn.microsoft.com/en-us/lifecycle/products/microsoft-edge-legacy) and there have been considerable updates over the past few years, I would prefer not to change this. Request it as a feature if it's a deal-breaker, and I'll give it some thought.
+* It definitely does not work with IE11 (it is based on [classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes))
+* It might not work with really old Edge Legacy versions
 
-<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/matchAll">
-    <img src="images/browser-support.png" alt="Browser support">
-</a>
+I do not consider this a disadvantage, but you may. Since Microsoft has already stopped supporting [IE11](https://learn.microsoft.com/en-us/lifecycle/products/internet-explorer-11) and the non-Chrome based [Edge Legacy](https://learn.microsoft.com/en-us/lifecycle/products/microsoft-edge-legacy), I would prefer not to bother supporting these.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

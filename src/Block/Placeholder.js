@@ -68,12 +68,26 @@ class Placeholder extends Block {
      * @return {String}
      */
     replaceTagsByPrefix_(content, prefix, callback) {
-        const tagPattern = new RegExp('\\' + prefix + '\\{(\\w*(?:\\.\\w*)*)\\}', 'g');
-        const tags = content.matchAll(tagPattern);
-        for (const tag of tags) {
+        for (const tag of this.tags_(content, prefix)) {
             content = content.replaceAll(tag[0], callback(tag[1]));
         }
         return content;
+    }
+    
+    /**
+     * @private {function}
+     * @param {String} content
+     * @param {Prefix} prefix
+     * @return {Array}
+     */
+    tags_(content, prefix) {
+        const tagPattern = new RegExp('\\' + prefix + '\\{(\\w*(?:\\.\\w*)*)\\}', 'g');
+        let tag;
+        let tags = [];
+        while ((tag = tagPattern.exec(content)) !== null) {
+            tags.push(tag);
+        }
+        return tags;
     }
 
     /**

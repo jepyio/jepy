@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Optional parser to generate and cache blocks based on a simple template format 
 
+## [1.2.0] - 2023-03-27
+
+### Changed
+
+- removed matchAll dependency for better browser support
+
 ## [1.1.1] - 2023-03-27
 
 ### Fixed
