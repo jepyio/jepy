@@ -245,6 +245,41 @@ callbackBlock.render({
 // output: <div>You have 2 items in your basket</div>
 ```
 
+#### jepy.Cached
+
+It will return the cached value of a Block on subsequent render requests to boost the performance. You can validate against this cached value with the optional validation callback in case the value need to be updated on param changes. Without the validation callback the cached value will never update for that run session. This could be useful if you cache something that should be static. Do not cache a block that only rendered once as it won't give you any advantage.
+
+```javascript
+const cachedBlock = new jepy.Cached(
+    new jepy.Composite([
+        new jepy.Callback(
+            (params) => params.name === undefined
+                ? ''
+                : 'Hello ' + params.name + '.'
+        ),
+        new jepy.Simple('This is a test')
+    ]),
+    (params, block) => {
+        const isValid = block.name === params.name;
+        if (!isValid) {
+            block.name = params.name
+        }
+        return isValid;
+    }
+);
+const templateParams = {
+    name: 'Adam'
+};
+cachedBlock.render(templateParams);
+// output (non-cached, rendered in runtime): Hello Adam. This is a test
+cachedBlock.render(templateParams);
+// output (returned from cache): Hello Adam. This is a test
+cachedBlock.render();
+// output (non-cached, rendered in runtime): This is a test
+cachedBlock.render();
+// output (returned from cache): This is a test
+```
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Roadmap

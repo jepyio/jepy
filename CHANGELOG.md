@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Optional parser to generate and cache blocks based on a simple template format 
 
+## [1.3.0] - 2023-03-30
+
+### Added
+
+- jepy.Cached to cache rendered blocks. This will return the cached value on subsequent render requests, which you may verify against if you want it to be updated.
+
 ## [1.2.1] - 2023-03-28
 
 ### Changed
