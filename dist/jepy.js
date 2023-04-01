@@ -330,6 +330,7 @@ var jepy = (function () {
     }
 
     const jepy = {
+        Block,
         Composite,
         Conditional,
         Placeholder,

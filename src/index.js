@@ -1,3 +1,4 @@
+import {Block} from './Block.js';
 import {Composite} from './Block/Composite.js';
 import {Conditional} from './Block/Conditional.js';
 import {Placeholder} from './Block/Placeholder.js';
@@ -7,6 +8,7 @@ import {Callback} from './Block/Callback.js';
 import {Cached} from './Block/Cached.js';
 
 const jepy = {
+    Block,
     Composite,
     Conditional,
     Placeholder,
