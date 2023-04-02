@@ -42,23 +42,35 @@ I do not consider this a disadvantage, but you may. Since Microsoft has already 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Usage
+## Install
 
-Build your own, use the "dist" folder's prebuilt JavaScript file or add the following to your page:
+Build your own, use the "dist" folder's prebuilt files or use one of the following options.
+
+### CDN
+
+You may add jepy to your site using CDN by including the following code on your site:
 
 ```
 <script src="https://cdn.jsdelivr.net/gh/jepyio/jepy/dist/jepy.min.js"></script>
 ```
 
-### Building blocks
+### npm
+
+Run the following to add jepy to your project:
+
+```
+npm install jepy --save
+```
+
+## Usage
 
 You can create your templates with the following building blocks. If you want to see how these are used together, go visit the examples page
 
-#### jepy.Placeholder
+### jepy.Placeholder
 
 Maybe the most powerful and adaptable building block available. This will fulfil most of your needs as a standalone logic and will cover what most template engines do. It could replace placeholders with an escaped and raw value or add partials to insert a text, Block or execute a function on the parameters to render your placeholder value. This supports parameter paths so you can use the following format to point to a value "first-level.second-level.third-level...". 
 
-##### jepy.Placeholder with raw value
+#### jepy.Placeholder with raw value
 
 ```javascript
 const placeholderBlock = new jepy.Placeholder('<div>%{text}</div>');
@@ -68,7 +80,7 @@ placeholderBlock.render({
 // output: <div><img src="test.jpg"></div>
 ```
 
-##### jepy.Placeholder with escaped value
+#### jepy.Placeholder with escaped value
 
 ```javascript
 const placeholderBlock = new jepy.Placeholder('<div>${values.text}</div>');
@@ -80,7 +92,7 @@ placeholderBlock.render({
 // output: <div>&#60;img src=&#34;test.jpg&#34;&#62;</div>
 ```
 
-##### jepy.Placeholder with partials
+#### jepy.Placeholder with partials
 
 ```javascript
 const placeholderBlock = new jepy.Placeholder(
@@ -98,7 +110,7 @@ placeholderBlock.render({
 // output: <img src="test.jpg">
 ```
 
-#### jepy.Simple
+### jepy.Simple
 
 This is the most basic building block, with no performance implications. The text you specified will be returned. Nothing flashy, but practical for jepy.Conditional and jepy.Composite, because these require a Block to render. This may be replaced with jepy.Placeholder, although with a little performance impact.
 
@@ -108,7 +120,7 @@ simpleBlock.render();
 // output: <div>Hello World</div>
 ```
 
-#### jepy.Conditional
+### jepy.Conditional
 
 This is your "if ... else ..." building block. It needs a function to check the condition on the params, a Block when the condition is true, and an optional Block when the condition is false. This condition function can be as simple or complicated as you want, so it should meet all your needs.
 
@@ -141,7 +153,7 @@ conditionalBlock.render({
 // output: <div>Hello Adam</div>
 ```
 
-#### jepy.Repeating
+### jepy.Repeating
 
 This is your "foreach ..." building block. This needs a path (same format as the placeholders) to an array parameter, a Block to render the values of the array and an optional function to modify or add parameters. By default only the item parameters will be passed to the Block, so you may need to add this optional function to pass other parameters
 
@@ -190,7 +202,7 @@ repeatingBlock.render({
 // output: <div>#1 green pencil</div><div>#2 red pencil</div>
 ```
 
-#### jepy.Composite
+### jepy.Composite
 
 This is used to stich together multiple Blocks into one. You can use this to make complex and extendable templates
 
@@ -220,7 +232,7 @@ compositeBlock.render({
 // output: <div><div>Hello World</div><div>#1 first</div><div>#2 second</div></div>
 ```
 
-#### jepy.Callback
+### jepy.Callback
 
 Use this if you want something with complicated logic that is also self-contained. This will return the text produced by the callback function that was passed on initialisation.
 
@@ -245,7 +257,7 @@ callbackBlock.render({
 // output: <div>You have 2 items in your basket</div>
 ```
 
-#### jepy.Cached
+### jepy.Cached
 
 It will return the cached value of a Block on subsequent render requests to boost the performance. You can validate against this cached value with the optional validation callback in case the value need to be updated on param changes. Without the validation callback the cached value will never update for that run session. This could be useful if you cache something that should be static. Do not cache a block that only rendered once as it won't give you any advantage.
 
