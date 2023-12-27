@@ -4,8 +4,6 @@
 class Block {
     /**
      * @abstract
-     * @public
-     * @function
      * @param {Object} params
      * @return {String}
      */
@@ -16,24 +14,24 @@ class Block {
  * @implements {Block}
  */
 class Composite extends Block {
+    /** @type {Array<Block>} */
+    #blocks;
+
     /**
      * @param {Array<Block>} blocks
      */
     constructor(blocks) {
         super();
-        /** @type {Array<Block>} */
-        this.blocks_ = blocks;
+        this.#blocks = blocks;
     }
 
     /**
      * @override
-     * @public
-     * @function
      * @param {Object} params
      * @return {String}
      */
     render(params) {
-        return this.blocks_.map((block) => block.render(params)).join('');
+        return this.#blocks.map((block) => block.render(params)).join('');
     }
 }
 
@@ -42,36 +40,38 @@ class Composite extends Block {
  */
 class Conditional extends Block {
     /**
+     * @type {function}
+     * @param {Object} params
+     */
+    #conditionCallback;
+    /** @type {Block} */
+    #blockOnTrue;
+    /** @type {Block} */
+    #blockOnFalse;
+
+    /**
      * @param {function} conditionCallback
      * @param {Block} blockOnTrue
      * @param {Block} blockOnFalse
      */
     constructor(conditionCallback, blockOnTrue, blockOnFalse) {
         super();
-        /**
-         * @type {function}
-         * @param {Object} params
-         */
-        this.conditionCallback_ = conditionCallback;
-        /** @type {Block} */
-        this.blockOnTrue_ = blockOnTrue;
-        /** @type {Block} */
-        this.blockOnFalse_ = blockOnFalse;
+        this.#conditionCallback = conditionCallback;
+        this.#blockOnTrue = blockOnTrue;
+        this.#blockOnFalse = blockOnFalse;
     }
 
     /**
      * @override
-     * @public
-     * @function
      * @param {Object} params
      * @return {String}
      */
     render(params) {
-        const isTrue = this.conditionCallback_(params);
+        const isTrue = this.#conditionCallback(params);
         if (isTrue) {
-            return this.blockOnTrue_.render(params);
+            return this.#blockOnTrue.render(params);
         }
-        return this.blockOnFalse_ ? this.blockOnFalse_.render(params) : '';
+        return this.#blockOnFalse ? this.#blockOnFalse.render(params) : '';
     }
 }
 
@@ -96,35 +96,43 @@ const Prefix = {
     RAW: '%',
     PARTIAL: '@'
 };
+/**
+ * @enum {String}
+ */
+const Bracket = {
+    OPEN: '{',
+    CLOSE: '}'
+};
 
 /**
  * @implements {Block}
  */
 class Placeholder extends Block {
+    /** @type {String} */
+    #content;
+    /** @type {Object} */
+    #partials;
+
     /**
      * @param {String} content
      * @param {Object} partials
      */
     constructor(content, partials) {
         super();
-        /** @type {String} */
-        this.content_ = content;
-        /** @type {Object} */
-        this.partials_ = partials;
+        this.#content = content;
+        this.#partials = partials;
     }
 
     /**
      * @override
-     * @public
-     * @function
      * @param {Object} params
      * @return {String}
      */
     render(params) {
-        let content = this.content_;
-        if (this.partials_ !== undefined) {
-            content = this.replaceTagsByPrefix_(content, Prefix.PARTIAL, (path) => {
-                let partial = paramFromPath(path, this.partials_);
+        let content = this.#content;
+        if (this.#partials !== undefined) {
+            content = this.#replaceTagsByPrefix(content, Prefix.PARTIAL, (path) => {
+                let partial = paramFromPath(path, this.#partials);
                 if (typeof partial === 'function') {
                     partial = partial(params);
                 }
@@ -136,53 +144,46 @@ class Placeholder extends Block {
             });
         }
         if (params) {
-            content = this.replaceTagsByPrefix_(content, Prefix.RAW, (path) =>
+            content = this.#replaceTagsByPrefix(content, Prefix.RAW, (path) =>
                 paramFromPath(path, params)
             );
-            content = this.replaceTagsByPrefix_(content, Prefix.ESCAPED, (path) => {
+            content = this.#replaceTagsByPrefix(content, Prefix.ESCAPED, (path) => {
                 const param = paramFromPath(path, params);
-                return typeof param === 'string' ? this.escape_(param) : param;
+                return typeof param === 'string' ? this.#escape(param) : param;
             });
         }
         return content;
     }
 
     /**
-     * @private {function}
      * @param {String} content
      * @param {Prefix} prefix
      * @param {function} callback
      * @return {String}
      */
-    replaceTagsByPrefix_(content, prefix, callback) {
-        for (const tag of this.tags_(content, prefix)) {
-            content = content.replaceAll(tag[0], callback(tag[1]));
+    #replaceTagsByPrefix(content, prefix, callback) {
+        const tagPattern = new RegExp(
+            '\\' +
+                prefix +
+                '\\' +
+                Bracket.OPEN +
+                '(?<path>\\w+(?:\\.\\w+)*)' +
+                '\\' +
+                Bracket.CLOSE,
+            'g'
+        );
+        const tags = content.matchAll(tagPattern);
+        for (const tag of tags) {
+            content = content.replaceAll(tag[0], callback(tag.groups.path));
         }
         return content;
     }
-    
-    /**
-     * @private {function}
-     * @param {String} content
-     * @param {Prefix} prefix
-     * @return {Array}
-     */
-    tags_(content, prefix) {
-        const tagPattern = new RegExp('\\' + prefix + '\\{(\\w*(?:\\.\\w*)*)\\}', 'g');
-        let tag;
-        let tags = [];
-        while ((tag = tagPattern.exec(content)) !== null) {
-            tags.push(tag);
-        }
-        return tags;
-    }
 
     /**
-     * @private {function}
      * @param {String} text
      * @return {String}
      */
-    escape_(text) {
+    #escape(text) {
         return text
             .replace(/([<>&]|[^#-~| |!])/g, (match) => '&#' + match.charCodeAt(0) + ';')
             .replace(
@@ -197,6 +198,17 @@ class Placeholder extends Block {
  * @implements {Block}
  */
 class Repeating extends Block {
+    /** @type {String} */
+    #path;
+    /** @type {Block} */
+    #repeatingBlock;
+    /**
+     * @type {function}
+     * @param {*} item
+     * @param {Object} params
+     */
+    #callback;
+
     /**
      * @param {String} path
      * @param {Block} repeatingBlock
@@ -204,30 +216,21 @@ class Repeating extends Block {
      */
     constructor(path, repeatingBlock, callback) {
         super();
-        /** @type {String} */
-        this.path_ = path;
-        /** @type {Block} */
-        this.repeatingBlock_ = repeatingBlock;
-        /**
-         * @type {function}
-         * @param {*} item
-         * @param {Object} params
-         */
-        this.callback_ = callback;
+        this.#path = path;
+        this.#repeatingBlock = repeatingBlock;
+        this.#callback = callback;
     }
 
     /**
      * @override
-     * @public
-     * @function
      * @param {Object} params
      * @return {String}
      */
     render(params) {
-        return paramFromPath(this.path_, params)
+        return paramFromPath(this.#path, params)
             .map((item) => {
-                const itemParams = this.callback_ ? this.callback_(item, params) : item;
-                return this.repeatingBlock_.render(itemParams);
+                const itemParams = this.#callback ? this.#callback(item, params) : item;
+                return this.#repeatingBlock.render(itemParams);
             })
             .join('');
     }
@@ -237,23 +240,23 @@ class Repeating extends Block {
  * @implements {Block}
  */
 class Simple extends Block {
+    /** @type {String} */
+    #content;
+
     /**
      * @param {String} content
      */
     constructor(content) {
         super();
-        /** @type {String} */
-        this.content_ = content;
+        this.#content = content;
     }
 
     /**
      * @override
-     * @public
-     * @function
      * @return {String}
      */
     render() {
-        return this.content_;
+        return this.#content;
     }
 }
 
@@ -262,26 +265,26 @@ class Simple extends Block {
  */
 class Callback extends Block {
     /**
+     * @type {function}
+     * @param {Object} params
+     */
+    #renderCallback;
+
+    /**
      * @param {function} renderCallback
      */
     constructor(renderCallback) {
         super();
-        /**
-         * @type {function}
-         * @param {Object} params
-         */
-        this.renderCallback_ = renderCallback;
+        this.#renderCallback = renderCallback;
     }
 
     /**
      * @override
-     * @public
-     * @function
      * @param {Object} params
      * @return {String}
      */
     render(params) {
-        return this.renderCallback_(params);
+        return this.#renderCallback(params);
     }
 }
 
@@ -289,40 +292,38 @@ class Callback extends Block {
  * @implements {Block}
  */
 class Cached extends Block {
+    /** @type {Block} */
+    #blockToCache;
+    /**
+     * @type {function}
+     * @param {Object} params
+     * @param {Cached} block
+     */
+    #validationCallback;
+    /** @type {String} */
+    #cachedValue = null;
+
     /**
      * @param {Block} blockToCache
      * @param {function} validationCallback
      */
     constructor(blockToCache, validationCallback) {
         super();
-        /** @type {Block} */
-        this.blockToCache_ = blockToCache;
-        /**
-         * @type {function}
-         * @param {Object} params
-         * @param {Cached} block
-         */
-        this.validationCallback_ = validationCallback
-            ? validationCallback
-            : () => true;
-        /** @type {String} */
-        this.cachedValue_ = null;
+        this.#blockToCache = blockToCache;
+        this.#validationCallback = validationCallback ? validationCallback : () => true;
     }
 
     /**
      * @override
-     * @public
-     * @function
      * @param {Object} params
      * @return {String}
      */
     render(params) {
-        const isValid = this.cachedValue_ !== null
-            && this.validationCallback_(params, this);
+        const isValid = this.#cachedValue !== null && this.#validationCallback(params, this);
         if (!isValid) {
-            this.cachedValue_ = this.blockToCache_.render(params);
+            this.#cachedValue = this.#blockToCache.render(params);
         }
-        return this.cachedValue_;
+        return this.#cachedValue;
     }
 }
 

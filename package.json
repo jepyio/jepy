@@ -1,6 +1,6 @@
 {
     "name": "jepy",
-    "version": "1.3.2",
+    "version": "1.3.3",
     "description": "Tiny, expandable and simple to use composition based JS template engine",
     "main": "jepy.jsm",
     "keywords": [

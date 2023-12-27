@@ -4,40 +4,38 @@ import {Block} from '../Block.js';
  * @implements {Block}
  */
 class Cached extends Block {
+    /** @type {Block} */
+    #blockToCache;
+    /**
+     * @type {function}
+     * @param {Object} params
+     * @param {Cached} block
+     */
+    #validationCallback;
+    /** @type {String} */
+    #cachedValue = null;
+
     /**
      * @param {Block} blockToCache
      * @param {function} validationCallback
      */
     constructor(blockToCache, validationCallback) {
         super();
-        /** @type {Block} */
-        this.blockToCache_ = blockToCache;
-        /**
-         * @type {function}
-         * @param {Object} params
-         * @param {Cached} block
-         */
-        this.validationCallback_ = validationCallback
-            ? validationCallback
-            : () => true;
-        /** @type {String} */
-        this.cachedValue_ = null;
+        this.#blockToCache = blockToCache;
+        this.#validationCallback = validationCallback ? validationCallback : () => true;
     }
 
     /**
      * @override
-     * @public
-     * @function
      * @param {Object} params
      * @return {String}
      */
     render(params) {
-        const isValid = this.cachedValue_ !== null
-            && this.validationCallback_(params, this);
+        const isValid = this.#cachedValue !== null && this.#validationCallback(params, this);
         if (!isValid) {
-            this.cachedValue_ = this.blockToCache_.render(params);
+            this.#cachedValue = this.#blockToCache.render(params);
         }
-        return this.cachedValue_;
+        return this.#cachedValue;
     }
 }
 

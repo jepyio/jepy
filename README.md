@@ -1,4 +1,5 @@
 <a name="readme-top"></a>
+
 <div align="center">
   <a href="https://github.com/jepyio/jepy">
     <img src="images/logo.svg" alt="Logo" height="80">
@@ -30,13 +31,15 @@
 There are several amazing JS template engines out there, but most of them require multiple dependencies, must be pre-built and hard to expand if you need something specific. I wanted something tiny, reusable, and capable of rendering in real time with good performance. jepy solve all of these issues while keeping it size to the minimum
 
 Here is what you get:
-* It is less than 2KB minimised
-* It doesn't require pre-building and doesn't have any external dependencies
-* This will provide you with powerful tools to create even the most complicated templates while making them reusable and expandable
+
+-   It is less than 2KB minimised
+-   It doesn't require pre-building and doesn't have any external dependencies
+-   This will provide you with powerful tools to create even the most complicated templates while making them reusable and expandable
 
 The things you don't get:
-* It definitely does not work with IE11 (it is based on [classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)). Fortunately, it is mostly extinct with ~0.25% worldwide market share
-* It might not work with really old Edge Legacy versions. These shouldn't be out in the wild anymore with the automatic updates, but possible if you didn't have any update from 2016
+
+-   It definitely does not work with IE11 (it is based on [classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)). Fortunately, it is mostly extinct with ~0.25% worldwide market share
+-   It might not work with really old Edge Legacy versions. These shouldn't be out in the wild anymore with the automatic updates, but possible if you didn't have any update from 2016
 
 I do not consider this a disadvantage, but you may. Since Microsoft has already stopped supporting [IE11](https://learn.microsoft.com/en-us/lifecycle/products/internet-explorer-11) and the non-Chrome based [Edge Legacy](https://learn.microsoft.com/en-us/lifecycle/products/microsoft-edge-legacy), I would prefer not to bother supporting these.
 
@@ -68,7 +71,7 @@ You can create your templates with the following building blocks. If you want to
 
 ### jepy.Placeholder
 
-Maybe the most powerful and adaptable building block available. This will fulfil most of your needs as a standalone logic and will cover what most template engines do. It could replace placeholders with an escaped and raw value or add partials to insert a text, Block or execute a function on the parameters to render your placeholder value. This supports parameter paths so you can use the following format to point to a value "first-level.second-level.third-level...". 
+Maybe the most powerful and adaptable building block available. This will fulfil most of your needs as a standalone logic and will cover what most template engines do. It could replace placeholders with an escaped and raw value or add partials to insert a text, Block or execute a function on the parameters to render your placeholder value. This supports parameter paths so you can use the following format to point to a value "first-level.second-level.third-level...".
 
 #### jepy.Placeholder with raw value
 
@@ -95,14 +98,11 @@ placeholderBlock.render({
 #### jepy.Placeholder with partials
 
 ```javascript
-const placeholderBlock = new jepy.Placeholder(
-    '@{partialOne}@{partialTwo}@{partialThree}',
-    {
-        partialOne: '<img ',
-        partialTwo: new jepy.Placeholder('src="${imageUrl}"'),
-        partialThree: (params) => params.endChar
-    }
-);
+const placeholderBlock = new jepy.Placeholder('@{partialOne}@{partialTwo}@{partialThree}', {
+    partialOne: '<img ',
+    partialTwo: new jepy.Placeholder('src="${imageUrl}"'),
+    partialThree: (params) => params.endChar
+});
 placeholderBlock.render({
     imageUrl: 'test.jpg',
     endChar: '>'
@@ -116,7 +116,7 @@ This is the most basic building block, with no performance implications. The tex
 
 ```javascript
 const simpleBlock = new jepy.Simple('<div>Hello World</div>');
-simpleBlock.render(); 
+simpleBlock.render();
 // output: <div>Hello World</div>
 ```
 
@@ -131,7 +131,7 @@ const conditionalBlock = new jepy.Conditional(
     new jepy.Placeholder('<div>Hello ${who}</div>')
 );
 conditionalBlock.render();
-// output: 
+// output:
 
 conditionalBlock.render({
     who: 'World'
@@ -142,7 +142,7 @@ conditionalBlock.render({
 const conditionalBlock = new jepy.Conditional(
     (params) => params.who !== undefined,
     new jepy.Placeholder('<div>Hello ${who}</div>'),
-    new jepy.Simple('<div>Sorry, I don\'t have your name</div>')
+    new jepy.Simple("<div>Sorry, I don't have your name</div>")
 );
 conditionalBlock.render();
 // output: <div>Sorry, I don\'t have your name</div>
@@ -210,11 +210,8 @@ This is used to stich together multiple Blocks into one. You can use this to mak
 const compositeBlock = new jepy.Composite([
     new jepy.Simple('<div>'),
     new jepy.Placeholder('<div>Hello ${who}</div>'),
-    new jepy.Repeating(
-        'items',
-        new jepy.Placeholder('<div>#${id} ${name}</div>')
-    ),
-    new jepy.Simple('</div>'),
+    new jepy.Repeating('items', new jepy.Placeholder('<div>#${id} ${name}</div>')),
+    new jepy.Simple('</div>')
 ]);
 compositeBlock.render({
     who: 'World',
@@ -249,10 +246,7 @@ const callbackBlock = new jepy.Callback((params) => {
     });
 });
 callbackBlock.render({
-    items: [
-        'pineapple',
-        'pen'
-    ]
+    items: ['pineapple', 'pen']
 });
 // output: <div>You have 2 items in your basket</div>
 ```
@@ -264,17 +258,15 @@ It will return the cached value of a Block on subsequent render requests to boos
 ```javascript
 const cachedBlock = new jepy.Cached(
     new jepy.Composite([
-        new jepy.Callback(
-            (params) => params.name === undefined
-                ? ''
-                : 'Hello ' + params.name + '.'
+        new jepy.Callback((params) =>
+            params.name === undefined ? '' : 'Hello ' + params.name + '.'
         ),
         new jepy.Simple('This is a test')
     ]),
     (params, block) => {
         const isValid = block.name === params.name;
         if (!isValid) {
-            block.name = params.name
+            block.name = params.name;
         }
         return isValid;
     }
@@ -296,9 +288,9 @@ cachedBlock.render();
 
 ## Roadmap
 
-- [x] Add basic building blocks and Block interface for custom classes
-- [x] Improve the "Usage" part of this README 
-- [ ] Add optional parser to generate and cache blocks based on a simple template format 
+-   [x] Add basic building blocks and Block interface for custom classes
+-   [x] Improve the "Usage" part of this README
+-   [ ] Add optional parser to generate and cache blocks based on a simple template format
 
 See the [open issues](https://github.com/jepyio/jepy/issues) for a full list of proposed features (and known issues).
 
@@ -321,4 +313,3 @@ Distributed under the MIT License. See `LICENSE` for more information.
 Sandor - sandor@jepy.io
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-

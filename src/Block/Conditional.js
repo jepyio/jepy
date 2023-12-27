@@ -5,36 +5,38 @@ import {Block} from '../Block.js';
  */
 class Conditional extends Block {
     /**
+     * @type {function}
+     * @param {Object} params
+     */
+    #conditionCallback;
+    /** @type {Block} */
+    #blockOnTrue;
+    /** @type {Block} */
+    #blockOnFalse;
+
+    /**
      * @param {function} conditionCallback
      * @param {Block} blockOnTrue
      * @param {Block} blockOnFalse
      */
     constructor(conditionCallback, blockOnTrue, blockOnFalse) {
         super();
-        /**
-         * @type {function}
-         * @param {Object} params
-         */
-        this.conditionCallback_ = conditionCallback;
-        /** @type {Block} */
-        this.blockOnTrue_ = blockOnTrue;
-        /** @type {Block} */
-        this.blockOnFalse_ = blockOnFalse;
+        this.#conditionCallback = conditionCallback;
+        this.#blockOnTrue = blockOnTrue;
+        this.#blockOnFalse = blockOnFalse;
     }
 
     /**
      * @override
-     * @public
-     * @function
      * @param {Object} params
      * @return {String}
      */
     render(params) {
-        const isTrue = this.conditionCallback_(params);
+        const isTrue = this.#conditionCallback(params);
         if (isTrue) {
-            return this.blockOnTrue_.render(params);
+            return this.#blockOnTrue.render(params);
         }
-        return this.blockOnFalse_ ? this.blockOnFalse_.render(params) : '';
+        return this.#blockOnFalse ? this.#blockOnFalse.render(params) : '';
     }
 }
 

@@ -5,6 +5,17 @@ import {paramFromPath} from '../params.js';
  * @implements {Block}
  */
 class Repeating extends Block {
+    /** @type {String} */
+    #path;
+    /** @type {Block} */
+    #repeatingBlock;
+    /**
+     * @type {function}
+     * @param {*} item
+     * @param {Object} params
+     */
+    #callback;
+
     /**
      * @param {String} path
      * @param {Block} repeatingBlock
@@ -12,30 +23,21 @@ class Repeating extends Block {
      */
     constructor(path, repeatingBlock, callback) {
         super();
-        /** @type {String} */
-        this.path_ = path;
-        /** @type {Block} */
-        this.repeatingBlock_ = repeatingBlock;
-        /**
-         * @type {function}
-         * @param {*} item
-         * @param {Object} params
-         */
-        this.callback_ = callback;
+        this.#path = path;
+        this.#repeatingBlock = repeatingBlock;
+        this.#callback = callback;
     }
 
     /**
      * @override
-     * @public
-     * @function
      * @param {Object} params
      * @return {String}
      */
     render(params) {
-        return paramFromPath(this.path_, params)
+        return paramFromPath(this.#path, params)
             .map((item) => {
-                const itemParams = this.callback_ ? this.callback_(item, params) : item;
-                return this.repeatingBlock_.render(itemParams);
+                const itemParams = this.#callback ? this.#callback(item, params) : item;
+                return this.#repeatingBlock.render(itemParams);
             })
             .join('');
     }

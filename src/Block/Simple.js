@@ -4,23 +4,23 @@ import {Block} from '../Block.js';
  * @implements {Block}
  */
 class Simple extends Block {
+    /** @type {String} */
+    #content;
+
     /**
      * @param {String} content
      */
     constructor(content) {
         super();
-        /** @type {String} */
-        this.content_ = content;
+        this.#content = content;
     }
 
     /**
      * @override
-     * @public
-     * @function
      * @return {String}
      */
     render() {
-        return this.content_;
+        return this.#content;
     }
 }
 

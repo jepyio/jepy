@@ -9,35 +9,43 @@ const Prefix = {
     RAW: '%',
     PARTIAL: '@'
 };
+/**
+ * @enum {String}
+ */
+const Bracket = {
+    OPEN: '{',
+    CLOSE: '}'
+};
 
 /**
  * @implements {Block}
  */
 class Placeholder extends Block {
+    /** @type {String} */
+    #content;
+    /** @type {Object} */
+    #partials;
+
     /**
      * @param {String} content
      * @param {Object} partials
      */
     constructor(content, partials) {
         super();
-        /** @type {String} */
-        this.content_ = content;
-        /** @type {Object} */
-        this.partials_ = partials;
+        this.#content = content;
+        this.#partials = partials;
     }
 
     /**
      * @override
-     * @public
-     * @function
      * @param {Object} params
      * @return {String}
      */
     render(params) {
-        let content = this.content_;
-        if (this.partials_ !== undefined) {
-            content = this.replaceTagsByPrefix_(content, Prefix.PARTIAL, (path) => {
-                let partial = paramFromPath(path, this.partials_);
+        let content = this.#content;
+        if (this.#partials !== undefined) {
+            content = this.#replaceTagsByPrefix(content, Prefix.PARTIAL, (path) => {
+                let partial = paramFromPath(path, this.#partials);
                 if (typeof partial === 'function') {
                     partial = partial(params);
                 }
@@ -49,53 +57,46 @@ class Placeholder extends Block {
             });
         }
         if (params) {
-            content = this.replaceTagsByPrefix_(content, Prefix.RAW, (path) =>
+            content = this.#replaceTagsByPrefix(content, Prefix.RAW, (path) =>
                 paramFromPath(path, params)
             );
-            content = this.replaceTagsByPrefix_(content, Prefix.ESCAPED, (path) => {
+            content = this.#replaceTagsByPrefix(content, Prefix.ESCAPED, (path) => {
                 const param = paramFromPath(path, params);
-                return typeof param === 'string' ? this.escape_(param) : param;
+                return typeof param === 'string' ? this.#escape(param) : param;
             });
         }
         return content;
     }
 
     /**
-     * @private {function}
      * @param {String} content
      * @param {Prefix} prefix
      * @param {function} callback
      * @return {String}
      */
-    replaceTagsByPrefix_(content, prefix, callback) {
-        for (const tag of this.tags_(content, prefix)) {
-            content = content.replaceAll(tag[0], callback(tag[1]));
+    #replaceTagsByPrefix(content, prefix, callback) {
+        const tagPattern = new RegExp(
+            '\\' +
+                prefix +
+                '\\' +
+                Bracket.OPEN +
+                '(?<path>\\w+(?:\\.\\w+)*)' +
+                '\\' +
+                Bracket.CLOSE,
+            'g'
+        );
+        const tags = content.matchAll(tagPattern);
+        for (const tag of tags) {
+            content = content.replaceAll(tag[0], callback(tag.groups.path));
         }
         return content;
     }
-    
-    /**
-     * @private {function}
-     * @param {String} content
-     * @param {Prefix} prefix
-     * @return {Array}
-     */
-    tags_(content, prefix) {
-        const tagPattern = new RegExp('\\' + prefix + '\\{(\\w*(?:\\.\\w*)*)\\}', 'g');
-        let tag;
-        let tags = [];
-        while ((tag = tagPattern.exec(content)) !== null) {
-            tags.push(tag);
-        }
-        return tags;
-    }
 
     /**
-     * @private {function}
      * @param {String} text
      * @return {String}
      */
-    escape_(text) {
+    #escape(text) {
         return text
             .replace(/([<>&]|[^#-~| |!])/g, (match) => '&#' + match.charCodeAt(0) + ';')
             .replace(

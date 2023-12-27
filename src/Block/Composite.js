@@ -4,24 +4,24 @@ import {Block} from '../Block.js';
  * @implements {Block}
  */
 class Composite extends Block {
+    /** @type {Array<Block>} */
+    #blocks;
+
     /**
      * @param {Array<Block>} blocks
      */
     constructor(blocks) {
         super();
-        /** @type {Array<Block>} */
-        this.blocks_ = blocks;
+        this.#blocks = blocks;
     }
 
     /**
      * @override
-     * @public
-     * @function
      * @param {Object} params
      * @return {String}
      */
     render(params) {
-        return this.blocks_.map((block) => block.render(params)).join('');
+        return this.#blocks.map((block) => block.render(params)).join('');
     }
 }
 

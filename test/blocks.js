@@ -246,51 +246,38 @@ describe('test cached block', function () {
     it('should return the simple block value', function () {
         const simpleBlock = new jepy.Simple('test me');
         const cachedBlock = new jepy.Cached(simpleBlock);
-        cachedBlock.render();
-        assert.equal(cachedBlock.cachedValue_, simpleBlock.render());
         assert.equal(cachedBlock.render(), simpleBlock.render());
     });
     it('should return the composite block value with validation', function () {
         const compositeBlock = new jepy.Composite([
             new jepy.Simple('merged '),
             new jepy.Placeholder('<div>@{partial}</div>', {
-                partial: (params) => params.name === undefined
-                    ? ''
-                    : 'Hello ' + params.name
+                partial: (params) => (params.name === undefined ? '' : 'Hello ' + params.name)
             }),
-            new jepy.Callback(
-                (params) => params.name === undefined
-                    ? ''
-                    : 'Hello ' + params.name
+            new jepy.Callback((params) =>
+                params.name === undefined ? '' : 'Hello ' + params.name
             ),
-            new jepy.Conditional((params) => params.name !== undefined, new jepy.Simple(' are returned'))
+            new jepy.Conditional(
+                (params) => params.name !== undefined,
+                new jepy.Simple(' are returned')
+            )
         ]);
-        const cachedBlock = new jepy.Cached(
-            compositeBlock,
-            (params, block) => {
-                const isValid = block.name === params.name;
-                if (!isValid) {
-                    block.name = params.name
-                }
-                return isValid;
+        const cachedBlock = new jepy.Cached(compositeBlock, (params, block) => {
+            const isValid = block.name === params.name;
+            if (!isValid) {
+                block.name = params.name;
             }
-        );
+            return isValid;
+        });
         const templateParamsOne = {
             name: 'John'
         };
         const compositeValueOne = compositeBlock.render(templateParamsOne);
-        cachedBlock.render(templateParamsOne);
-        assert.equal(cachedBlock.cachedValue_, compositeValueOne);
         assert.equal(cachedBlock.render(templateParamsOne), compositeValueOne);
-        assert.equal(cachedBlock.cachedValue_, compositeValueOne);
         const templateParamsTwo = {
             name: 'Adam'
         };
         const compositeValueTwo = compositeBlock.render(templateParamsTwo);
-        cachedBlock.render(templateParamsTwo);
-        assert.equal(cachedBlock.cachedValue_, compositeValueTwo);
         assert.equal(cachedBlock.render(templateParamsTwo), compositeValueTwo);
-        assert.equal(cachedBlock.cachedValue_, compositeValueTwo);
-
     });
 });

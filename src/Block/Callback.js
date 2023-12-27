@@ -5,26 +5,26 @@ import {Block} from '../Block.js';
  */
 class Callback extends Block {
     /**
+     * @type {function}
+     * @param {Object} params
+     */
+    #renderCallback;
+
+    /**
      * @param {function} renderCallback
      */
     constructor(renderCallback) {
         super();
-        /**
-         * @type {function}
-         * @param {Object} params
-         */
-        this.renderCallback_ = renderCallback;
+        this.#renderCallback = renderCallback;
     }
 
     /**
      * @override
-     * @public
-     * @function
      * @param {Object} params
      * @return {String}
      */
     render(params) {
-        return this.renderCallback_(params);
+        return this.#renderCallback(params);
     }
 }
 
