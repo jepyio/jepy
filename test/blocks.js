@@ -281,3 +281,64 @@ describe('test cached block', function () {
         assert.equal(cachedBlock.render(templateParamsTwo), compositeValueTwo);
     });
 });
+describe('test indented block', function () {
+    it('should return the space indented value', function () {
+        const simpleBlock = new jepy.Simple('test me');
+        const indentedBlock = new jepy.Indented(
+            simpleBlock,
+            jepy.IndentType.SPACE,
+            4
+        );
+        assert.equal(indentedBlock.render(), '    ' + simpleBlock.render());
+    });
+    it('should return the tab indented value', function () {
+        const simpleBlock = new jepy.Simple('test me');
+        const indentedBlock = new jepy.Indented(
+            simpleBlock,
+            jepy.IndentType.TAB,
+            1
+        );
+        assert.equal(indentedBlock.render(), '\t' + simpleBlock.render());
+    });
+    it('should return the space indented multi line', function () {
+        const simpleBlock = new jepy.Simple('<div>\n    test\n    me\n</div>');
+        const indentedBlock = new jepy.Indented(
+            simpleBlock,
+            jepy.IndentType.SPACE,
+            4
+        );
+        assert.equal(
+            indentedBlock.render(), 
+            '    <div>\n        test\n        me\n    </div>'
+        );
+    });
+    it('should return the tab indented multi line', function () {
+        const simpleBlock = new jepy.Simple('<div>\n\ttest\n\tme\n</div>');
+        const indentedBlock = new jepy.Indented(
+            simpleBlock,
+            jepy.IndentType.TAB,
+            1
+        );
+        assert.equal(
+            indentedBlock.render(), 
+            '\t<div>\n\t\ttest\n\t\tme\n\t</div>'
+        );
+    });
+    it('should return the space indented multi line string', function () {
+        const simpleBlock = new jepy.Simple(
+`<div>
+    test
+    me
+</div>`
+        );
+        const indentedBlock = new jepy.Indented(
+            simpleBlock,
+            jepy.IndentType.SPACE,
+            4
+        );
+        assert.equal(
+            indentedBlock.render(), 
+            '    <div>\n        test\n        me\n    </div>'
+        );
+    });
+});

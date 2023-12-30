@@ -284,6 +284,34 @@ cachedBlock.render();
 // output (returned from cache): This is a test
 ```
 
+### jepy.Indented
+
+This can be used to indent a single or multi-line Block.
+
+```javascript
+const compositeBlock = new jepy.Composite([
+    new jepy.Simple('<div>\n'),
+    new jepy.Indented(
+        new jepy.Placeholder('<div>\n    %{name}\n</div>')
+        jepy.IndentType.SPACE,
+        4
+    ),
+    new jepy.Simple('\n</div>'),
+]);
+const templateParams = {
+    name: 'Adam'
+};
+compositeBlock.render(templateParams);
+/**
+ * output:
+ * <div>
+ *     <div>
+ *         Adam
+ *     </div>
+ * </div>
+ */
+```
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Roadmap

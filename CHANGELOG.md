@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Optional parser to generate and cache blocks based on a simple template format
 
+## [1.3.4] - 2023-12-30
+
+### Added
+
+-   jepy.Indented to indent rendered blocks. The rendered content of the Block provided to this will be returned indented
+
 ## [1.3.3] - 2023-12-27
 
 ### Changed

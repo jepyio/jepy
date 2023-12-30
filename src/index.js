@@ -6,6 +6,7 @@ import {Repeating} from './Block/Repeating.js';
 import {Simple} from './Block/Simple.js';
 import {Callback} from './Block/Callback.js';
 import {Cached} from './Block/Cached.js';
+import {Indented, IndentType} from './Block/Indented.js';
 
 const jepy = {
     Block,
@@ -15,6 +16,8 @@ const jepy = {
     Repeating,
     Simple,
     Callback,
-    Cached
+    Cached,
+    IndentType,
+    Indented
 };
 export default jepy;
