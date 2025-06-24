@@ -32,13 +32,13 @@ There are several amazing JS template engines out there, but most of them requir
 
 Here is what you get:
 
--   It is less than 2KB minimised
+-   It is ~4KB
 -   It doesn't require pre-building and doesn't have any external dependencies
 -   This will provide you with powerful tools to create even the most complicated templates while making them reusable and expandable
 
 The things you don't get:
 
--   It definitely does not work with IE11 (it is based on [classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)). Fortunately, it is mostly extinct with ~0.25% worldwide market share
+-   It definitely does not work with IE11 (it is based on [classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)). Fortunately, it is mostly extinct
 -   It might not work with really old Edge Legacy versions. These shouldn't be out in the wild anymore with the automatic updates, but possible if you didn't have any update from 2016
 
 I do not consider this a disadvantage, but you may. Since Microsoft has already stopped supporting [IE11](https://learn.microsoft.com/en-us/lifecycle/products/internet-explorer-11) and the non-Chrome based [Edge Legacy](https://learn.microsoft.com/en-us/lifecycle/products/microsoft-edge-legacy), I would prefer not to bother supporting these.
@@ -67,52 +67,147 @@ npm install jepy --save
 
 ## Usage
 
-You can create your templates with the following building blocks. If you want to see how these are used together, go visit the examples page
+You can create your templates with the following building blocks. If you want to see how this works, go visit the examples page
 
-### jepy.Placeholder
+### jepy.Template
 
-Maybe the most powerful and adaptable building block available. This will fulfil most of your needs as a standalone logic and will cover what most template engines do. It could replace placeholders with an escaped and raw value or add partials to insert a text, Block or execute a function on the parameters to render your placeholder value. This supports parameter paths so you can use the following format to point to a value "first-level.second-level.third-level...".
+The most powerful and adaptable building block available. This will fulfil most of your needs as a standalone logic and will cover what most template engines do. It could replace placeholders with an escaped or raw value, and add blocks or partials to insert a text, Block or execute a function on the parameters to render your placeholder value. This supports parameter paths so you can use the following format to point to a value "first-level.second-level.third-level...".
 
-#### jepy.Placeholder with raw value
+#### jepy.Template with raw value
 
 ```javascript
-const placeholderBlock = new jepy.Placeholder('<div>%{text}</div>');
-placeholderBlock.render({
-    text: '<img src="test.jpg">'
+const templateBlock = new jepy.Template('<div>%{text}</div>');
+templateBlock.render({
+    text: '<img src="test.jpg">',
 });
 // output: <div><img src="test.jpg"></div>
 ```
 
-#### jepy.Placeholder with escaped value
+#### jepy.Template with escaped value
 
 ```javascript
-const placeholderBlock = new jepy.Placeholder('<div>${values.text}</div>');
-placeholderBlock.render({
+const templateBlock = new jepy.Template('<div>${values.text}</div>');
+templateBlock.render({
     values: {
         text: '<img src="test.jpg">'
-    }
+    },
 });
 // output: <div>&#60;img src=&#34;test.jpg&#34;&#62;</div>
 ```
 
-#### jepy.Placeholder with partials
+#### jepy.Template with partials
 
 ```javascript
-const placeholderBlock = new jepy.Placeholder('@{partialOne}@{partialTwo}@{partialThree}', {
-    partialOne: '<img ',
-    partialTwo: new jepy.Placeholder('src="${imageUrl}"'),
-    partialThree: (params) => params.endChar
+const templateBlock = new jepy.Template('%{@rawPartialString}${@escapedPartialBlock}%{@rawPartialCallback}', {
+    rawPartialString: '<img ',
+    escapedPartialBlock: new jepy.Template('src="${imageUrl}"'),
+    rawPartialCallback: (params) => params.endChar,
 });
-placeholderBlock.render({
+templateBlock.render({
     imageUrl: 'test.jpg',
-    endChar: '>'
+    endChar: '>',
 });
-// output: <img src="test.jpg">
+// output: <img src=&#34;test.jpg&#34;>
+```
+
+#### jepy.Template with Conditional Block against a parameter
+
+```javascript
+const templateBlock = new jepy.Template('Hello ?{firstName}${firstName}?{/firstName}?{!firstName}guest?{/firstName}!');
+templateBlock.render({
+    firstName: 'Adam',
+});
+// output: Hello Adam!
+templateBlock.render({
+    firstName: '',
+});
+// output: Hello guest!
+```
+
+#### jepy.Template with Conditional Block against a partial
+
+```javascript
+const templateBlock = new jepy.Template(
+    'You are?{!@isSmith} not?{/@isSmith}? a Smith',
+    {
+        isSmith: (params) => params.lastName === 'Smith'
+    }
+);
+templateBlock.render({
+    lastName: 'Smith',
+});
+// output: You are a Smith
+templateBlock.render({
+    lastName: 'Wolf',
+});
+// output: You are not a Smith
+```
+
+#### jepy.Template with simple Repeating Block
+
+```javascript
+const templateBlock = new jepy.Template('#{items}${name} ?{!inStock}[Not in stock]?{/inStock},#{/items}');
+templateBlock.render({
+    items: [
+        {
+            name: 'pen',
+            inStock: true
+        },
+        {
+            name: 'apple',
+            inStock: false
+        },
+    ],
+});
+// output: pen,apple [Not in stock],
+```
+
+#### jepy.Template with Repeating Block using an alias
+
+```javascript
+const templateBlock = new jepy.Template('#{items:item}${item},#{/items}');
+templateBlock.render({
+    items: [
+        'apple',
+        'pen'
+    ],
+});
+// output: apple,pen,
+```
+
+#### jepy.Template with Idented Block using spaces
+
+```javascript
+const templateBlock = new jepy.Template('_{indentedBlock:1}${text}_{/indentedBlock}');
+templateBlock.render({
+    text: 'space indented text',
+});
+// output: " space indented text"
+```
+
+#### jepy.Template with Idented Block using tabs
+
+```javascript
+const templateBlock = new jepy.Template('>{indentedBlock:2}${text}>{/indentedBlock}');
+templateBlock.render({
+    text: 'tab indented text',
+});
+// output: "\t\ttab indented text"
+```
+
+#### jepy.Template with Cached Block
+
+```javascript
+const templateBlock = new jepy.Template('={cachedBlock}${text} ={/cachedBlock}={cachedBlock}={/cachedBlock}');
+templateBlock.render({
+    text: 'cached text',
+});
+// output: cached text cached text 
 ```
 
 ### jepy.Simple
 
-This is the most basic building block, with no performance implications. The text you specified will be returned. Nothing flashy, but practical for jepy.Conditional and jepy.Composite, because these require a Block to render. This may be replaced with jepy.Placeholder, although with a little performance impact.
+This is the most basic building block, with no performance implications. The text you specified will be returned. Nothing flashy, but practical for jepy.Conditional and jepy.Composite, because these require a Block to render. This may be replaced with jepy.Template, although with a performance impact.
 
 ```javascript
 const simpleBlock = new jepy.Simple('<div>Hello World</div>');
@@ -128,7 +223,7 @@ This is your "if ... else ..." building block. It needs a function to check the 
 // without optional "else"
 const conditionalBlock = new jepy.Conditional(
     (params) => params.who !== undefined,
-    new jepy.Placeholder('<div>Hello ${who}</div>')
+    new jepy.Template('<div>Hello ${who}</div>')
 );
 conditionalBlock.render();
 // output:
@@ -141,7 +236,7 @@ conditionalBlock.render({
 // with "else"
 const conditionalBlock = new jepy.Conditional(
     (params) => params.who !== undefined,
-    new jepy.Placeholder('<div>Hello ${who}</div>'),
+    new jepy.Template('<div>Hello ${who}</div>'),
     new jepy.Simple("<div>Sorry, I don't have your name</div>")
 );
 conditionalBlock.render();
@@ -161,7 +256,7 @@ This is your "foreach ..." building block. This needs a path (same format as the
 // without parameter modifier function
 const repeatingBlock = new jepy.Repeating(
     'items',
-    new jepy.Placeholder('<div>#${id} ${name}</div>')
+    new jepy.Template('<div>#${id} ${name}</div>')
 );
 repeatingBlock.render({
     items: [
@@ -180,7 +275,7 @@ repeatingBlock.render({
 // with parameter modifier
 const repeatingBlock = new jepy.Repeating(
     'items',
-    new jepy.Placeholder('<div>#${id} ${colour} ${name}</div>'),
+    new jepy.Template('<div>#${id} ${colour} ${name}</div>'),
     (item, params) => {
         item.name = params.itemName;
         return item;
@@ -209,8 +304,8 @@ This is used to stich together multiple Blocks into one. You can use this to mak
 ```javascript
 const compositeBlock = new jepy.Composite([
     new jepy.Simple('<div>'),
-    new jepy.Placeholder('<div>Hello ${who}</div>'),
-    new jepy.Repeating('items', new jepy.Placeholder('<div>#${id} ${name}</div>')),
+    new jepy.Template('<div>Hello ${who}</div>'),
+    new jepy.Repeating('items', new jepy.Template('<div>#${id} ${name}</div>')),
     new jepy.Simple('</div>')
 ]);
 compositeBlock.render({
@@ -237,7 +332,7 @@ Use this if you want something with complicated logic that is also self-containe
 const callbackBlock = new jepy.Callback((params) => {
     const itemCount = params.items.length;
     const singularOrPlural = (noun, counter) => (counter > 1 ? noun + 's' : noun);
-    const basketBlock = new jepy.Placeholder(
+    const basketBlock = new jepy.Template(
         '<div>You have ${itemCount} ${itemText} in your basket</div>'
     );
     return basketBlock.render({
@@ -292,7 +387,7 @@ This can be used to indent a single or multi-line Block.
 const compositeBlock = new jepy.Composite([
     new jepy.Simple('<div>\n'),
     new jepy.Indented(
-        new jepy.Placeholder('<div>\n    %{name}\n</div>')
+        new jepy.Template('<div>\n    %{name}\n</div>')
         jepy.IndentType.SPACE,
         4
     ),
@@ -318,7 +413,10 @@ compositeBlock.render(templateParams);
 
 -   [x] Add basic building blocks and Block interface for custom classes
 -   [x] Improve the "Usage" part of this README
--   [ ] Add optional parser to generate and cache blocks based on a simple template format
+-   [x] Add optional parser to generate and cache blocks based on a simple template format
+-   [ ] Add the "else" tag to Conditional blocks in jepy.Template to make it more readable and lean
+-   [ ] Add special parameters like "loop.first" and "loop.last" that could be used inside a Repeating block in jepy.Template
+-   [ ] Add an option for validation partial to the Cached blocks in jepy.Template
 
 See the [open issues](https://github.com/jepyio/jepy/issues) for a full list of proposed features (and known issues).
 
@@ -326,7 +424,7 @@ See the [open issues](https://github.com/jepyio/jepy/issues) for a full list of 
 
 ## Contributing
 
-Your support is **greatly appreciated**! If you have ideas for enhancements, please fork the repository and submit a pull request to the "development" branch. Remember to execute "npm run test" before committing to ensure that everything is still working! You can alternatively create a new issue with the tag "enhancement". Don't forget to star the project! Thank you once more!
+Your support is **greatly appreciated**! If you have ideas for enhancements, please fork the repository and submit a pull request to the "development" branch. Remember to execute "npm run build" before committing to ensure that everything is still working! You can alternatively create a new issue with the tag "enhancement". Don't forget to star the project! Thank you once more!
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

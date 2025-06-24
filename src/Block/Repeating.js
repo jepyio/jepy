@@ -7,6 +7,8 @@ import {paramFromPath} from '../params.js';
 class Repeating extends Block {
     /** @type {String} */
     #path;
+    /** @type {String} */
+    #alias;
     /** @type {Block} */
     #repeatingBlock;
     /**
@@ -19,13 +21,15 @@ class Repeating extends Block {
     /**
      * @param {String} path
      * @param {Block} repeatingBlock
-     * @param {function} callback
+     * @param {function} [callback]
+     * @param {String} [alias]
      */
-    constructor(path, repeatingBlock, callback) {
+    constructor(path, repeatingBlock, callback, alias = '') {
         super();
         this.#path = path;
         this.#repeatingBlock = repeatingBlock;
         this.#callback = callback;
+        this.#alias = alias;
     }
 
     /**
@@ -34,10 +38,18 @@ class Repeating extends Block {
      * @return {String}
      */
     render(params) {
-        return paramFromPath(this.#path, params)
+        let items = paramFromPath(this.#path, params);
+        if (this.#alias) {
+            items = items.map((item) =>
+                Object.defineProperty({}, this.#alias, {
+                    value: item
+                })
+            );
+        }
+        return items
             .map((item) => {
                 const itemParams = this.#callback ? this.#callback(item, params) : item;
-                return this.#repeatingBlock.render(itemParams);
+                return this.#repeatingBlock.render(Object.assign(itemParams, params));
             })
             .join('');
     }

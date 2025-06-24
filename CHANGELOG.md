@@ -7,7 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
--   Optional parser to generate and cache blocks based on a simple template format
+- adding the "else" tag to Conditional blocks in jepy.Template to make it more readable and lean
+- adding special parameters like "loop.first" and "loop.last" that could be used inside a Repeating block in jepy.Template
+- adding an option for validation partial to the Cached blocks in jepy.Template
+
+## [2.0.0] - 2025-06-24
+
+### Added
+
+- added the alias property to the Repeating block, allowing you to encapsulate elements into a named object. this is handy, for example, if you provide an array of strings that you wish to refer to in your template with a specific name
+
+### Changed
+
+- jepy.Placeholder changed into jepy.Template with block logic support and expanded capabilities
+- made the @ partial placeholder into an operator that could be used in other placeholder and block logic. for example it is now possible to have an raw %{@partialName} and escaped ${@partialName} partial placeholder
 
 ## [1.3.4] - 2023-12-30
 

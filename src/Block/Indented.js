@@ -40,15 +40,14 @@ class Indented extends Block {
         const content = this.#block.render(params);
         const lines = content.split('\n');
         if (lines.length > 1) {
-            return lines.map((line) => this.#pad(line))
-                .join('\n');
+            return lines.map((line) => this.#pad(line)).join('\n');
         }
         return this.#pad(content);
     }
 
     /**
      * @param {String} content
-     * @return {String} 
+     * @return {String}
      */
     #pad(content) {
         return content.padStart(this.#indentLevel + content.length, this.#indentType);

@@ -79,123 +79,25 @@ var jepy = (function () {
     }
 
     /**
+     * @enum {String}
+     */
+    const Glue = {
+        PATH: '.',
+        PARAM: ':'
+    };
+
+    /**
      * @type {function}
      * @param {String} path
      * @param {*} params
      * @return {*}
      */
     const paramFromPath = (path, params) => {
-        if (path.includes('.')) {
-            return path.split('.').reduce((name, currentValue) => name?.[currentValue], params);
+        if (path.includes(Glue.PATH)) {
+            return path.split(Glue.PATH).reduce((name, currentValue) => name?.[currentValue], params);
         }
         return params[path];
     };
-
-    /**
-     * @enum {String}
-     */
-    const Prefix = {
-        ESCAPED: '$',
-        RAW: '%',
-        PARTIAL: '@'
-    };
-    /**
-     * @enum {String}
-     */
-    const Bracket = {
-        OPEN: '{',
-        CLOSE: '}'
-    };
-
-    /**
-     * @implements {Block}
-     */
-    class Placeholder extends Block {
-        /** @type {String} */
-        #content;
-        /** @type {Object} */
-        #partials;
-
-        /**
-         * @param {String} content
-         * @param {Object} partials
-         */
-        constructor(content, partials) {
-            super();
-            this.#content = content;
-            this.#partials = partials;
-        }
-
-        /**
-         * @override
-         * @param {Object} params
-         * @return {String}
-         */
-        render(params) {
-            let content = this.#content;
-            if (this.#partials !== undefined) {
-                content = this.#replaceTagsByPrefix(content, Prefix.PARTIAL, (path) => {
-                    let partial = paramFromPath(path, this.#partials);
-                    if (typeof partial === 'function') {
-                        partial = partial(params);
-                    }
-                    const isBlock = typeof partial === 'object' && partial instanceof Block;
-                    if (isBlock) {
-                        return partial.render(params);
-                    }
-                    return partial;
-                });
-            }
-            if (params) {
-                content = this.#replaceTagsByPrefix(content, Prefix.RAW, (path) =>
-                    paramFromPath(path, params)
-                );
-                content = this.#replaceTagsByPrefix(content, Prefix.ESCAPED, (path) => {
-                    const param = paramFromPath(path, params);
-                    return typeof param === 'string' ? this.#escape(param) : param;
-                });
-            }
-            return content;
-        }
-
-        /**
-         * @param {String} content
-         * @param {Prefix} prefix
-         * @param {function} callback
-         * @return {String}
-         */
-        #replaceTagsByPrefix(content, prefix, callback) {
-            const tagPattern = new RegExp(
-                '\\' +
-                    prefix +
-                    '\\' +
-                    Bracket.OPEN +
-                    '(?<path>\\w+(?:\\.\\w+)*)' +
-                    '\\' +
-                    Bracket.CLOSE,
-                'g'
-            );
-            const tags = content.matchAll(tagPattern);
-            for (const tag of tags) {
-                content = content.replaceAll(tag[0], callback(tag.groups.path));
-            }
-            return content;
-        }
-
-        /**
-         * @param {String} text
-         * @return {String}
-         */
-        #escape(text) {
-            return text
-                .replace(/([<>&]|[^#-~| |!])/g, (match) => '&#' + match.charCodeAt(0) + ';')
-                .replace(
-                    /[\uD800-\uDBFF][\uDC00-\uDFFF]/g,
-                    (match) =>
-                        '&#' + (match.charCodeAt(0) * 0x400 + match.charCodeAt(1) - 0x35fdc00) + ';'
-                );
-        }
-    }
 
     /**
      * @implements {Block}
@@ -203,6 +105,8 @@ var jepy = (function () {
     class Repeating extends Block {
         /** @type {String} */
         #path;
+        /** @type {String} */
+        #alias;
         /** @type {Block} */
         #repeatingBlock;
         /**
@@ -215,13 +119,15 @@ var jepy = (function () {
         /**
          * @param {String} path
          * @param {Block} repeatingBlock
-         * @param {function} callback
+         * @param {function} [callback]
+         * @param {String} [alias]
          */
-        constructor(path, repeatingBlock, callback) {
+        constructor(path, repeatingBlock, callback, alias = '') {
             super();
             this.#path = path;
             this.#repeatingBlock = repeatingBlock;
             this.#callback = callback;
+            this.#alias = alias;
         }
 
         /**
@@ -230,10 +136,18 @@ var jepy = (function () {
          * @return {String}
          */
         render(params) {
-            return paramFromPath(this.#path, params)
+            let items = paramFromPath(this.#path, params);
+            if (this.#alias) {
+                items = items.map((item) =>
+                    Object.defineProperty({}, this.#alias, {
+                        value: item
+                    })
+                );
+            }
+            return items
                 .map((item) => {
                     const itemParams = this.#callback ? this.#callback(item, params) : item;
-                    return this.#repeatingBlock.render(itemParams);
+                    return this.#repeatingBlock.render(Object.assign(itemParams, params));
                 })
                 .join('');
         }
@@ -370,32 +284,284 @@ var jepy = (function () {
             const content = this.#block.render(params);
             const lines = content.split('\n');
             if (lines.length > 1) {
-                return lines.map((line) => this.#pad(line))
-                    .join('\n');
+                return lines.map((line) => this.#pad(line)).join('\n');
             }
             return this.#pad(content);
         }
 
         /**
          * @param {String} content
-         * @return {String} 
+         * @return {String}
          */
         #pad(content) {
             return content.padStart(this.#indentLevel + content.length, this.#indentType);
         }
     }
 
+    /**
+     * @enum {String}
+     */
+    const Prefix = {
+        ESCAPED: '$',
+        RAW: '%',
+    };
+
+    /**
+     * @enum {String}
+     */
+    const BlockPrefix = {
+        REPEATING: '#',
+        CONDITIONAL: '?',
+        TAB_INDENTED: '>',
+        SPACE_INDENTED: '_',
+        CACHED: '='
+    };
+
+    /**
+     * @enum {String}
+     */
+    const Bracket = {
+        OPEN: '{',
+        CLOSE: '}'
+    };
+
+    /**
+     * @enum {String}
+     */
+    const Operator = {
+        NOT: '!',
+        PARTIAL: '@',
+    };
+
+    /**
+     * @implements {Block}
+     */
+    class Template {
+        /**
+         * @var {String}
+         */
+        #content = '';
+        /**
+         * @var {Object}
+         */
+        #partials = {};
+        /**
+         * @var {Boolean}
+         */
+        #initialised = false;
+
+        /**
+         * @param {String} content
+         * @param {Object} [partials]
+         */
+        constructor(content, partials = {}) {
+            this.#content = content;
+            this.#partials = partials;
+        }
+
+        /**
+         * @override
+         * @param {Object} [params]
+         * @return {String}
+         */
+        render(params = {}) {
+            if (!this.#initialised) {
+                this.#build();
+            }
+            let content = this.#content;
+            /**
+             * @param {String} prefix
+             * @param {function} callback
+             */
+            const replaceTagsByPrefix = (prefix, callback) => {
+                const tagPattern = new RegExp(
+                    '\\' +
+                        prefix +
+                        '\\' +
+                        Bracket.OPEN +
+                        '(?<path>\\' + Operator.PARTIAL + '?\\w+(?:\\' +
+                        Glue.PATH +
+                        '(\\w|\\_\\-)+)*)' +
+                        '\\' +
+                        Bracket.CLOSE,
+                    'g'
+                );
+                const tags = content.matchAll(tagPattern);
+                for (const tag of tags) {
+                    content = content.replaceAll(tag[0], callback(tag.groups.path));
+                }
+            };
+            replaceTagsByPrefix(Prefix.RAW, (path) => this.#paramFromPath(path, params));
+            replaceTagsByPrefix(Prefix.ESCAPED, (path) => {
+                const param = this.#paramFromPath(path, params);
+                if (typeof param === 'string') {
+                    return this.#escape(param);
+                }
+                return param;
+            });
+            return content;
+        }
+
+        /**
+         * @param {String} path
+         * @param {*} params
+         * @return {*}
+         */
+        #paramFromPath(path, params) {
+            if (path.startsWith(Operator.PARTIAL)) {
+                return this.#partialFromPath(path, params);
+            }
+            return paramFromPath(path, params);
+        }
+
+        /**
+         * @param {String} path
+         * @param {*} params
+         * @return {*}
+         */
+        #partialFromPath(path, params) {
+            const partialName = path.slice(1);
+            let partial = paramFromPath(partialName, this.#partials);
+            if (typeof partial === 'function') {
+                partial = partial(params);
+            }
+            const isBlock = typeof partial === 'object' && partial instanceof Block;
+            if (isBlock) {
+                return partial.render(params);
+            }
+            return partial;
+        }
+
+        /**
+         * @param {String} text
+         * @return {String}
+         */
+        #escape(text) {
+            return text
+                .replace(/([<>&]|[^#-~| |!])/g, (match) => '&#' + match.charCodeAt(0) + ';')
+                .replace(
+                    /[\uD800-\uDBFF][\uDC00-\uDFFF]/g,
+                    (match) =>
+                        '&#' + (match.charCodeAt(0) * 0x400 + match.charCodeAt(1) - 0x35fdc00) + ';'
+                );
+        }
+
+        #build() {
+            const escapedBlockPrefixes = Object.values(BlockPrefix).map(
+                (blockPrefix) => '\\' + blockPrefix
+            );
+            const blockPattern = new RegExp(
+                '(?<prefix>[' +
+                    escapedBlockPrefixes.join('') +
+                    '])' +
+                    '\\' +
+                    Bracket.OPEN +
+                    '(?<operator>[\\' +
+                    Operator.NOT +
+                    '])?' +
+                    '(?<placeholder>(?<name>\\' + Operator.PARTIAL + '?\\w+(?:\\' +
+                    Glue.PATH +
+                    '\\w+)*)(?:\\' +
+                    Glue.PARAM +
+                    '[\\w\\d]+)?)' +
+                    '\\' +
+                    Bracket.CLOSE +
+                    '(?<content>(.|\n)*?)\\k<prefix>\\' +
+                    Bracket.OPEN +
+                    '\\/\\k<name>' +
+                    '\\' +
+                    Bracket.CLOSE,
+                'g'
+            );
+            let counter = 0;
+            let matches = [];
+            let blockPartials = {};
+            while ((matches = Array.from(this.#content.matchAll(blockPattern))).length > 0) {
+                const block = matches[0];
+                const blockId = 'block_' + counter;
+                counter++;
+                const blockPlaceholder = Prefix.RAW + Bracket.OPEN + Operator.PARTIAL + blockId + Bracket.CLOSE;
+                this.#content = this.#content.replace(block[0], blockPlaceholder);
+                blockPartials[blockId] = this.#blockCallback(block);
+            }
+            this.#partials = Object.assign(this.#partials, blockPartials);
+            this.#initialised = true;
+        }
+
+        /**
+         * @param {Object} block
+         * @return {Function}
+         */
+        #blockCallback(block) {
+            const prefix = block.groups.prefix;
+            const placeholder = block.groups.placeholder;
+            const partials = Object.assign({}, this.#partials);
+            const blockTemplate = new Template(block.groups.content, partials);
+            switch (prefix) {
+            case BlockPrefix.CONDITIONAL:
+                return (params) => {
+                    return new Conditional(
+                        () => {
+                            const param = this.#paramFromPath(placeholder, params);
+                            const isFalse =
+                                    !param ||
+                                    (Object.hasOwn(param, 'length') && param.length === 0) ||
+                                    (typeof param === 'object' && Object.keys(param).length === 0);
+                            const expectsFalse = block.groups.operator === Operator.NOT;
+                            const isFulfilled =
+                                    (isFalse && expectsFalse) || (!isFalse && !expectsFalse);
+                            return isFulfilled;
+                        },
+                        blockTemplate,
+                        new Simple('')
+                    );
+                };
+            case BlockPrefix.REPEATING:
+                return () => {
+                    const parts = placeholder.split(Glue.PARAM);
+                    const path = parts.at(0);
+                    const alias = placeholder.includes(Glue.PARAM) ? parts.at(1) : '';
+                    return new Repeating(path, blockTemplate, (item) => item, alias);
+                };
+            case BlockPrefix.TAB_INDENTED:
+            case BlockPrefix.SPACE_INDENTED:
+                return () => {
+                    const indentLevel = placeholder.includes(Glue.PARAM)
+                        ? parseInt(placeholder.split(Glue.PARAM).at(1))
+                        : 0;
+                    return new Indented(
+                        blockTemplate,
+                        prefix === BlockPrefix.TAB_INDENTED ? IndentType.TAB : IndentType.SPACE,
+                        indentLevel
+                    );
+                };
+            case BlockPrefix.CACHED:
+                return () => {
+                    const parts = placeholder.split(Glue.PARAM);
+                    const cacheName = 'cached_' + parts.at(0);
+                    if (!Object.hasOwn(this.#partials, cacheName)) {
+                        this.#partials[cacheName] = new Cached(blockTemplate);
+                    }
+                    return this.#partials[cacheName];
+                };
+            default:
+                throw new SyntaxError('unhandled prefix "' + prefix + '"');
+            }
+        }
+
+    }
+
     const jepy = {
         Block,
         Composite,
         Conditional,
-        Placeholder,
         Repeating,
         Simple,
         Callback,
         Cached,
         IndentType,
-        Indented
+        Indented,
+        Template
     };
 
     return jepy;

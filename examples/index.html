@@ -63,36 +63,21 @@
         <div class="js-basket-example-two p_16 mt_16 bg_slate-10 rounded_8"></div>
         <div class="js-basket-example-three p_16 mt_16 bg_slate-10 rounded_8"></div>
         <script>
-            const helloMessageBlock = new jepy.Placeholder('<div>Hi ${user.name}!</div>');
-            const containerBlock = (contentBlock) => {
-                return new jepy.Composite([
-                    new jepy.Simple('<div class="mt_16 p_16 bg_slate-30 rounded_8">'),
-                    contentBlock,
-                    new jepy.Simple('</div>')
-                ]);
-            };
-            const randomJokeExample = new jepy.Composite([
-                helloMessageBlock,
-                containerBlock(
-                    new jepy.Conditional(
-                        (params) => params.jokes.length > 0,
-                        new jepy.Composite([
-                            new jepy.Placeholder('<div>Here is your random joke:</div>'),
-                            new jepy.Placeholder(
-                                '<div><strong>@{randomJoke}</strong></div>',
-                                {
-                                    randomJoke: (params) => {
-                                        const jokes = params.jokes;
-                                        const index = Math.floor(Math.random() * jokes.length);
-                                        return jokes[index];
-                                    }
-                                }
-                            )
-                        ]),
-                        new jepy.Simple('<div>Sorry, I\'m out of jokes at the moment</div>')
-                    )
-                )
-            ]);
+            const randomJokeExample = new jepy.Template(
+                '<div>Hi ${user.name}!</div>'
+                    + '<div class="mt_16 p_16 bg_slate-30 rounded_8">'
+                    + '?{@hasJokes}<div>Here is your random joke:</div><div><strong>${@randomJoke}</strong></div>?{/@hasJokes}'
+                    + '?{!@hasJokes}<div>Sorry, I\'m out of jokes at the moment</div>?{/@hasJokes}'
+                    + '</div>',
+                {
+                    hasJokes: (params) => params.jokes.length > 0,
+                    randomJoke: (params) => {
+                        const jokes = params.jokes;
+                        const index = Math.floor(Math.random() * jokes.length);
+                        return jokes[index];
+                    },
+                }
+            );
             document.querySelector('.js-random-joke-example-one').innerHTML = randomJokeExample.render({
                 user: {
                     name: 'Mary'
@@ -111,36 +96,26 @@
                 ]
             });
             const singularOrPlural = (noun, counter) => (counter > 1 ? noun + 's' : noun);
-            const basketExample = new jepy.Composite([
-                helloMessageBlock,
-                containerBlock(
-                    new jepy.Conditional(
-                        (params) => params.items.length > 0,
-                        new jepy.Composite([
-                            new jepy.Placeholder(
-                                '<div class="my_8">You have <strong>@{numberOfItems} @{itemText}</strong> in your basket</div>',
-                                {
-                                    numberOfItems: (params) => params.items.length,
-                                    itemText: (params) => singularOrPlural('item', params.items.length)
-                                }
-                            ),
-                            new jepy.Simple('<div class="ml_8">'),
-                            new jepy.Repeating(
-                                'items',
-                                new jepy.Placeholder(
-                                    '<li class="flex_row mt_4"><a href="${url}">${text}</a>@{status}</li>', 
-                                    {
-                                        status: (params) =>
-                                            params.outOfStock ? '<div class="status_out-of-stock ml_4" title="Out of stock"></div>' : ''
-                                    }
-                                )
-                            ),
-                            new jepy.Simple('</div>')
-                        ]),
-                        new jepy.Simple('<div>Your basket is empty</div>')
-                    )
-                )
-            ]);
+            const basketExample = new jepy.Template(
+                '<div>Hi ${user.name}!</div>'
+                    + '<div class="mt_16 p_16 bg_slate-30 rounded_8">'
+                    + '?{@hasItems}'
+                    + '<div class="my_8">You have <strong>${@numberOfItems} ${@itemText}</strong> in your basket</div>'
+                    + '<div class="ml_8"><ul>'
+                    + '#{items}<li class="flex_row mt_4"><a href="${url}">${text}</a>%{@status}</li>#{/items}'
+                    + '</ul></div>'
+                    + '?{/@hasItems}'
+                    + '?{!@hasItems}<div>Your basket is empty</div>?{/@hasItems}'
+                    + '</div>',
+                {
+                    hasItems: (params) => params.items.length > 0,
+                    numberOfItems: (params) => params.items.length,
+                    itemText: (params) => singularOrPlural('item', params.items.length),
+                    status: (params) => params.outOfStock 
+                        ? '<div class="status_out-of-stock ml_4" title="Out of stock"></div>' 
+                        : ''
+                }
+            );
             document.querySelector('.js-basket-example-one').innerHTML = basketExample.render({
                 user: {
                     name: 'Mary'

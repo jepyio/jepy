@@ -7,9 +7,9 @@ describe('test simple block', function () {
         assert.equal(block.render(), '<div>test</div>');
     });
 });
-describe('test placeholder block', function () {
+describe('test template block', function () {
     it('placeholder must be replaced with an unescaped string', function () {
-        const block = new jepy.Placeholder('<div>%{element}</div>');
+        const block = new jepy.Template('<div>%{element}</div>');
         assert.equal(
             block.render({
                 element: '<div>element</div>'
@@ -18,7 +18,7 @@ describe('test placeholder block', function () {
         );
     });
     it('use multi level path for placeholder value', function () {
-        const block = new jepy.Placeholder('<div>%{first.second.third}</div>');
+        const block = new jepy.Template('<div>%{first.second.third}</div>');
         assert.equal(
             block.render({
                 first: {
@@ -31,7 +31,7 @@ describe('test placeholder block', function () {
         );
     });
     it('escape html in text', function () {
-        const block = new jepy.Placeholder('<div>${text}</div>');
+        const block = new jepy.Template('<div>${text}</div>');
         assert.equal(
             block.render({
                 text: '<img src="test.jpg">'
@@ -40,7 +40,7 @@ describe('test placeholder block', function () {
         );
     });
     it('escape surrogate pair rocket emoji', function () {
-        const block = new jepy.Placeholder('<div>${text}</div>');
+        const block = new jepy.Template('<div>${text}</div>');
         assert.equal(
             block.render({
                 text: '🚀'
@@ -49,13 +49,13 @@ describe('test placeholder block', function () {
         );
     });
     it('partial must be replaced with unescaped string', function () {
-        const block = new jepy.Placeholder('<div>@{partial}</div>', {
+        const block = new jepy.Template('<div>%{@partial}</div>', {
             partial: '<div>element</div>'
         });
         assert.equal(block.render(), '<div><div>element</div></div>');
     });
     it('partial must be replaced with unescaped function return', function () {
-        const block = new jepy.Placeholder('<div>@{partial}</div>', {
+        const block = new jepy.Template('<div>${@partial}</div>', {
             partial: (params) => 'Hello ' + params.name
         });
         assert.equal(
@@ -66,7 +66,7 @@ describe('test placeholder block', function () {
         );
     });
     it('partial must be replaced with block content', function () {
-        const block = new jepy.Placeholder('<div>@{partial}</div>', {
+        const block = new jepy.Template('<div>${@partial}</div>', {
             partial: new jepy.Conditional(
                 (params) => params.isVisible,
                 new jepy.Simple('Am I visible?')
@@ -78,6 +78,112 @@ describe('test placeholder block', function () {
             }),
             '<div>Am I visible?</div>'
         );
+    });
+    it('conditional block only rendering when value is truly', function () {
+        const block = new jepy.Template(
+            '?{firstName}${firstName}?{/firstName}?{lastName} ${lastName}?{/lastName}'
+        );
+        assert.equal(
+            block.render({
+                firstName: 'Adam',
+                lastName: ''
+            }),
+            'Adam'
+        );
+    });
+    it('conditional block with partial and false return', function () {
+        const block = new jepy.Template(
+            '?{@hasFirstAndLastName}${firstName} ${lastName}?{/@hasFirstAndLastName}',
+            {
+                hasFirstAndLastName: (params) => params.firstName && params.lastName
+            }
+        );
+        assert.equal(
+            block.render({
+                firstName: 'Adam'
+            }),
+            ''
+        );
+    });
+    it('conditional block with partial and true return', function () {
+        const block = new jepy.Template(
+            '?{@hasFirstAndLastName}${firstName} ${lastName}?{/@hasFirstAndLastName}',
+            {
+                hasFirstAndLastName: (params) => params.firstName && params.lastName
+            }
+        );
+        assert.equal(
+            block.render({
+                firstName: 'Adam',
+                lastName: 'Smith'
+            }),
+            'Adam Smith'
+        );
+    });
+    it('conditional block with partial, not operator and falsey return', function () {
+        const block = new jepy.Template('?{!@isLastNameSmith}not ?{/@isLastNameSmith}Smith', {
+            isLastNameSmith: (params) => params.lastName && params.lastName === 'Smith'
+        });
+        assert.equal(
+            block.render({
+                lastName: 'Wolf'
+            }),
+            'not Smith'
+        );
+    });
+    it('conditional block with partial, not operator and truly', function () {
+        const block = new jepy.Template('?{!@isLastNameSmith}not ?{/@isLastNameSmith}Smith', {
+            isLastNameSmith: (params) => params.lastName && params.lastName === 'Smith'
+        });
+        assert.equal(
+            block.render({
+                lastName: 'Smith'
+            }),
+            'Smith'
+        );
+    });
+    it('space indented text', function () {
+        const block = new jepy.Template('_{test:4}space indented text_{/test}');
+        assert.equal(block.render(), '    space indented text');
+    });
+    it('space indented multi line text', function () {
+        const block = new jepy.Template('_{test:4}space indented\nmulti line text_{/test}');
+        assert.equal(block.render(), '    space indented\n    multi line text');
+    });
+    it('tab indented text', function () {
+        const block = new jepy.Template('>{test:2}tab indented text>{/test}');
+        assert.equal(block.render(), '\t\ttab indented text');
+    });
+    it('repeating block without alias', function () {
+        const block = new jepy.Template('#{items}${name} #{/items}');
+        assert.equal(
+            block.render({
+                items: [
+                    {
+                        name: 'item1'
+                    },
+                    {
+                        name: 'item2'
+                    }
+                ]
+            }),
+            'item1 item2 '
+        );
+    });
+    it('repeating block with alias', function () {
+        const block = new jepy.Template('#{items:item}${item} #{/items}');
+        assert.equal(
+            block.render({
+                items: ['item1', 'item2']
+            }),
+            'item1 item2 '
+        );
+    });
+    it('cached block is returning previously cached value', function () {
+        const block = new jepy.Template(
+            '={cachedBlock}cached block ={/cachedBlock}={cachedBlock}={/cachedBlock}'
+        );
+        assert.equal(block.render(), 'cached block cached block ');
     });
 });
 describe('test conditional block', function () {
@@ -104,7 +210,7 @@ describe('test repeating block', function () {
     it('returns repeating text', function () {
         const block = new jepy.Repeating(
             'items',
-            new jepy.Placeholder('<a href="${url}">${text}</a>')
+            new jepy.Template('<a href="${url}">${text}</a>')
         );
         assert.equal(
             block.render({
@@ -125,7 +231,7 @@ describe('test repeating block', function () {
     it('returns repeating text with callback', function () {
         const block = new jepy.Repeating(
             'items',
-            new jepy.Placeholder('${prefix} line #${line.number}</br>'),
+            new jepy.Template('${prefix} line #${line.number}</br>'),
             (item, params) => {
                 params.line = {
                     number: item
@@ -150,8 +256,8 @@ describe('test complex block chain', function () {
             new jepy.Conditional(
                 (params) => params.items.length > 0,
                 new jepy.Composite([
-                    new jepy.Placeholder(
-                        '<div>You have @{numberOfItems} @{itemText} in your basket</div><ul>',
+                    new jepy.Template(
+                        '<div>You have ${@numberOfItems} ${@itemText} in your basket</div><ul>',
                         {
                             numberOfItems: (params) => params.items.length,
                             itemText: (params) => singularOrPlural('item', params.items.length)
@@ -159,7 +265,7 @@ describe('test complex block chain', function () {
                     ),
                     new jepy.Repeating(
                         'items',
-                        new jepy.Placeholder('<li><a href="${url}">@{icon}${text}</a></li>', {
+                        new jepy.Template('<li><a href="${url}">%{@icon}${text}</a></li>', {
                             icon: (params) =>
                                 params.outOfStock ? '<span class="out-of-stock"></span>' : ''
                         })
@@ -220,7 +326,7 @@ describe('test callback block', function () {
         const block = new jepy.Callback((params) => {
             const itemCount = params.items.length;
             const singularOrPlural = (noun, counter) => (counter > 1 ? noun + 's' : noun);
-            const basketBlock = new jepy.Placeholder(
+            const basketBlock = new jepy.Template(
                 '<div>You have ${itemCount} ${itemText} in your basket</div>'
             );
             return basketBlock.render({
@@ -251,7 +357,7 @@ describe('test cached block', function () {
     it('should return the composite block value with validation', function () {
         const compositeBlock = new jepy.Composite([
             new jepy.Simple('merged '),
-            new jepy.Placeholder('<div>@{partial}</div>', {
+            new jepy.Template('<div>${@partial}</div>', {
                 partial: (params) => (params.name === undefined ? '' : 'Hello ' + params.name)
             }),
             new jepy.Callback((params) =>
@@ -284,61 +390,32 @@ describe('test cached block', function () {
 describe('test indented block', function () {
     it('should return the space indented value', function () {
         const simpleBlock = new jepy.Simple('test me');
-        const indentedBlock = new jepy.Indented(
-            simpleBlock,
-            jepy.IndentType.SPACE,
-            4
-        );
+        const indentedBlock = new jepy.Indented(simpleBlock, jepy.IndentType.SPACE, 4);
         assert.equal(indentedBlock.render(), '    ' + simpleBlock.render());
     });
     it('should return the tab indented value', function () {
         const simpleBlock = new jepy.Simple('test me');
-        const indentedBlock = new jepy.Indented(
-            simpleBlock,
-            jepy.IndentType.TAB,
-            1
-        );
+        const indentedBlock = new jepy.Indented(simpleBlock, jepy.IndentType.TAB, 1);
         assert.equal(indentedBlock.render(), '\t' + simpleBlock.render());
     });
     it('should return the space indented multi line', function () {
         const simpleBlock = new jepy.Simple('<div>\n    test\n    me\n</div>');
-        const indentedBlock = new jepy.Indented(
-            simpleBlock,
-            jepy.IndentType.SPACE,
-            4
-        );
-        assert.equal(
-            indentedBlock.render(), 
-            '    <div>\n        test\n        me\n    </div>'
-        );
+        const indentedBlock = new jepy.Indented(simpleBlock, jepy.IndentType.SPACE, 4);
+        assert.equal(indentedBlock.render(), '    <div>\n        test\n        me\n    </div>');
     });
     it('should return the tab indented multi line', function () {
         const simpleBlock = new jepy.Simple('<div>\n\ttest\n\tme\n</div>');
-        const indentedBlock = new jepy.Indented(
-            simpleBlock,
-            jepy.IndentType.TAB,
-            1
-        );
-        assert.equal(
-            indentedBlock.render(), 
-            '\t<div>\n\t\ttest\n\t\tme\n\t</div>'
-        );
+        const indentedBlock = new jepy.Indented(simpleBlock, jepy.IndentType.TAB, 1);
+        assert.equal(indentedBlock.render(), '\t<div>\n\t\ttest\n\t\tme\n\t</div>');
     });
     it('should return the space indented multi line string', function () {
         const simpleBlock = new jepy.Simple(
-`<div>
+            `<div>
     test
     me
 </div>`
         );
-        const indentedBlock = new jepy.Indented(
-            simpleBlock,
-            jepy.IndentType.SPACE,
-            4
-        );
-        assert.equal(
-            indentedBlock.render(), 
-            '    <div>\n        test\n        me\n    </div>'
-        );
+        const indentedBlock = new jepy.Indented(simpleBlock, jepy.IndentType.SPACE, 4);
+        assert.equal(indentedBlock.render(), '    <div>\n        test\n        me\n    </div>');
     });
 });
