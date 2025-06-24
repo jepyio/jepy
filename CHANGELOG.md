@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - adding special parameters like "loop.first" and "loop.last" that could be used inside a Repeating block in jepy.Template
 - adding an option for validation partial to the Cached blocks in jepy.Template
 
+## [2.0.1] - 2025-06-24
+
+### Fixed
+
+- fixed package.json repository url and added versioned cdn link in readme
+
 ## [2.0.0] - 2025-06-24
 
 ### Added

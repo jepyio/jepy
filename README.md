@@ -51,10 +51,18 @@ Build your own, use the "dist" folder's prebuilt files or use one of the followi
 
 ### CDN
 
-You may add jepy to your site using CDN by including the following code on your site:
+You may add jepy to your site using CDN by including either of the following code on your site.
+
+Latest major version:
 
 ```
 <script src="https://cdn.jsdelivr.net/gh/jepyio/jepy/dist/jepy.min.js"></script>
+```
+
+Specific version (recommended to avoid breaking changes):
+
+```
+<script src="https://cdn.jsdelivr.net/npm/jepy@2.0.0/dist/jepy.min.js"></script>
 ```
 
 ### npm
