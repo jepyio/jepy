@@ -52,7 +52,8 @@ class Template {
          */
         const replaceTagsByPrefix = (prefix, callback) => {
             const tagPattern = new RegExp(
-                '\\' +
+                '(?<indent>[ \\t]*)' +
+                    '\\' +
                     prefix +
                     '\\' +
                     Bracket.OPEN +
@@ -61,11 +62,15 @@ class Template {
                     '(\\w|\\_\\-)+)*)' +
                     '\\' +
                     Bracket.CLOSE,
-                'g'
+                'gm'
             );
             const tags = content.matchAll(tagPattern);
             for (const tag of tags) {
-                content = content.replaceAll(tag[0], callback(tag.groups.path));
+                const param = callback(tag.groups.path);
+                content = content.replaceAll(
+                    tag[0], 
+                    this.#indentParam(param, tag.groups.indent)
+                );
             }
         };
         replaceTagsByPrefix(Prefix.RAW, (path) => this.#paramFromPath(path, params));
@@ -77,6 +82,21 @@ class Template {
             return param;
         });
         return content;
+    }
+
+    /**
+     * @param {String} param
+     * @param {String} indent
+     * @return {String}
+     */
+    #indentParam(param, indent) {
+        if (!indent) {
+            return param;
+        }
+        if (typeof param === 'string' && param.includes('\n')) {
+            return indent + param.replace(new RegExp('\\n', 'g'), '\n' + indent);
+        }
+        return indent + param;
     }
 
     /**
@@ -148,7 +168,7 @@ class Template {
                 '\\/\\k<name>' +
                 '\\' +
                 Bracket.CLOSE,
-            'g'
+            'gm'
         );
         let counter = 0;
         let matches = [];

@@ -185,6 +185,28 @@ describe('test template block', function () {
         );
         assert.equal(block.render(), 'cached block cached block ');
     });
+    it('indent multi line params', function () {
+        const block = new jepy.Template(
+`<script type="importmap">
+    %{json}
+</script>`,
+            {},
+            true
+        );
+        assert.equal(
+            block.render({
+                json: 
+`{
+    "test": 1
+}`
+            }),
+`<script type="importmap">
+    {
+        "test": 1
+    }
+</script>`
+        );
+    });
 });
 describe('test conditional block', function () {
     it('should return the block content when condition is true', function () {

@@ -137,17 +137,17 @@ var jepy = (function () {
          */
         render(params) {
             let items = paramFromPath(this.#path, params);
-            if (this.#alias) {
-                items = items.map((item) =>
-                    Object.defineProperty({}, this.#alias, {
-                        value: item
-                    })
-                );
-            }
             return items
                 .map((item) => {
-                    const itemParams = this.#callback ? this.#callback(item, params) : item;
-                    return this.#repeatingBlock.render(Object.assign(itemParams, params));
+                    if (this.#alias) {
+                        item = Object.defineProperty({}, this.#alias, {
+                            value: item
+                        });
+                    }
+                    if (this.#callback) {
+                        item = this.#callback(item, params);
+                    }
+                    return this.#repeatingBlock.render(Object.assign(item, params));
                 })
                 .join('');
         }
@@ -281,21 +281,14 @@ var jepy = (function () {
          * @return {String}
          */
         render(params) {
+            const indent = String().padStart(this.#indentLevel, this.#indentType);
             const content = this.#block.render(params);
-            const lines = content.split('\n');
-            if (lines.length > 1) {
-                return lines.map((line) => this.#pad(line)).join('\n');
+            if (content.includes('\n')) {
+                return indent + content.replace(new RegExp('\\n', 'g'), '\n' + indent);
             }
-            return this.#pad(content);
+            return indent + content;
         }
 
-        /**
-         * @param {String} content
-         * @return {String}
-         */
-        #pad(content) {
-            return content.padStart(this.#indentLevel + content.length, this.#indentType);
-        }
     }
 
     /**
@@ -375,7 +368,8 @@ var jepy = (function () {
              */
             const replaceTagsByPrefix = (prefix, callback) => {
                 const tagPattern = new RegExp(
-                    '\\' +
+                    '(?<indent>[ \\t]*)' +
+                        '\\' +
                         prefix +
                         '\\' +
                         Bracket.OPEN +
@@ -384,11 +378,15 @@ var jepy = (function () {
                         '(\\w|\\_\\-)+)*)' +
                         '\\' +
                         Bracket.CLOSE,
-                    'g'
+                    'gm'
                 );
                 const tags = content.matchAll(tagPattern);
                 for (const tag of tags) {
-                    content = content.replaceAll(tag[0], callback(tag.groups.path));
+                    const param = callback(tag.groups.path);
+                    content = content.replaceAll(
+                        tag[0], 
+                        this.#indentParam(param, tag.groups.indent)
+                    );
                 }
             };
             replaceTagsByPrefix(Prefix.RAW, (path) => this.#paramFromPath(path, params));
@@ -400,6 +398,21 @@ var jepy = (function () {
                 return param;
             });
             return content;
+        }
+
+        /**
+         * @param {String} param
+         * @param {String} indent
+         * @return {String}
+         */
+        #indentParam(param, indent) {
+            if (!indent) {
+                return param;
+            }
+            if (typeof param === 'string' && param.includes('\n')) {
+                return indent + param.replace(new RegExp('\\n', 'g'), '\n' + indent);
+            }
+            return indent + param;
         }
 
         /**
@@ -471,7 +484,7 @@ var jepy = (function () {
                     '\\/\\k<name>' +
                     '\\' +
                     Bracket.CLOSE,
-                'g'
+                'gm'
             );
             let counter = 0;
             let matches = [];

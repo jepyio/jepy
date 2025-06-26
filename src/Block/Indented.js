@@ -37,21 +37,14 @@ class Indented extends Block {
      * @return {String}
      */
     render(params) {
+        const indent = String().padStart(this.#indentLevel, this.#indentType);
         const content = this.#block.render(params);
-        const lines = content.split('\n');
-        if (lines.length > 1) {
-            return lines.map((line) => this.#pad(line)).join('\n');
+        if (content.includes('\n')) {
+            return indent + content.replace(new RegExp('\\n', 'g'), '\n' + indent);
         }
-        return this.#pad(content);
+        return indent + content;
     }
 
-    /**
-     * @param {String} content
-     * @return {String}
-     */
-    #pad(content) {
-        return content.padStart(this.#indentLevel + content.length, this.#indentType);
-    }
 }
 
 export {Indented, IndentType};

@@ -1,6 +1,6 @@
 {
     "name": "jepy",
-    "version": "2.0.1",
+    "version": "2.1.0",
     "description": "Tiny, expandable and simple to use composition based JS template engine",
     "main": "jepy.jsm",
     "keywords": [
@@ -16,6 +16,7 @@
         "fix:format": "prettier --write .",
         "lint": "eslint ./src/",
         "test": "mocha --reporter spec",
+        "benchmark": "node ./benchmark/block-render.js",
         "minify": "terser --config-file .terser.json ./dist/jepy.js -o ./dist/jepy.min.js",
         "prebuild": "npm run lint",
         "build": "npm run test && rollup --config rollup.config.js && npm run minify",
@@ -33,13 +34,14 @@
     },
     "homepage": "https://github.com/jepyio/jepy",
     "devDependencies": {
+        "chai": "^4.3.7",
         "eslint": "^8.28.0",
         "eslint-config-prettier": "^8.5.0",
         "eslint-plugin-import": "^2.26.0",
+        "mitata": "^1.0.34",
+        "mocha": "^10.1.0",
         "prettier": "2.8.0",
         "rollup": "^3.5.0",
-        "terser": "^5.16.0",
-        "chai": "^4.3.7",
-        "mocha": "^10.1.0"
+        "terser": "^5.16.0"
     }
 }
