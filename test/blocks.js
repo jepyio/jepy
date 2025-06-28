@@ -12,9 +12,9 @@ describe('test template block', function () {
         const block = new jepy.Template('<div>%{element}</div>');
         assert.equal(
             block.render({
-                element: '<div>element</div>'
+                element: '<div>element</div>',
             }),
-            '<div><div>element</div></div>'
+            '<div><div>element</div></div>',
         );
     });
     it('use multi level path for placeholder value', function () {
@@ -23,123 +23,123 @@ describe('test template block', function () {
             block.render({
                 first: {
                     second: {
-                        third: '<div>element</div>'
-                    }
-                }
+                        third: '<div>element</div>',
+                    },
+                },
             }),
-            '<div><div>element</div></div>'
+            '<div><div>element</div></div>',
         );
     });
     it('escape html in text', function () {
         const block = new jepy.Template('<div>${text}</div>');
         assert.equal(
             block.render({
-                text: '<img src="test.jpg">'
+                text: '<img src="test.jpg">',
             }),
-            '<div>&#60;img src=&#34;test.jpg&#34;&#62;</div>'
+            '<div>&#60;img src=&#34;test.jpg&#34;&#62;</div>',
         );
     });
     it('escape surrogate pair rocket emoji', function () {
         const block = new jepy.Template('<div>${text}</div>');
         assert.equal(
             block.render({
-                text: '🚀'
+                text: '🚀',
             }),
-            '<div>&#55357;&#56960;</div>'
+            '<div>&#55357;&#56960;</div>',
         );
     });
     it('partial must be replaced with unescaped string', function () {
         const block = new jepy.Template('<div>%{@partial}</div>', {
-            partial: '<div>element</div>'
+            partial: '<div>element</div>',
         });
         assert.equal(block.render(), '<div><div>element</div></div>');
     });
     it('partial must be replaced with unescaped function return', function () {
         const block = new jepy.Template('<div>${@partial}</div>', {
-            partial: (params) => 'Hello ' + params.name
+            partial: (params) => 'Hello ' + params.name,
         });
         assert.equal(
             block.render({
-                name: 'John'
+                name: 'John',
             }),
-            '<div>Hello John</div>'
+            '<div>Hello John</div>',
         );
     });
     it('partial must be replaced with block content', function () {
         const block = new jepy.Template('<div>${@partial}</div>', {
             partial: new jepy.Conditional(
                 (params) => params.isVisible,
-                new jepy.Simple('Am I visible?')
-            )
+                new jepy.Simple('Am I visible?'),
+            ),
         });
         assert.equal(
             block.render({
-                isVisible: true
+                isVisible: true,
             }),
-            '<div>Am I visible?</div>'
+            '<div>Am I visible?</div>',
         );
     });
     it('conditional block only rendering when value is truly', function () {
         const block = new jepy.Template(
-            '?{firstName}${firstName}?{/firstName}?{lastName} ${lastName}?{/lastName}'
+            '?{firstName}${firstName}?{/firstName}?{lastName} ${lastName}?{/lastName}',
         );
         assert.equal(
             block.render({
                 firstName: 'Adam',
-                lastName: ''
+                lastName: '',
             }),
-            'Adam'
+            'Adam',
         );
     });
     it('conditional block with partial and false return', function () {
         const block = new jepy.Template(
             '?{@hasFirstAndLastName}${firstName} ${lastName}?{/@hasFirstAndLastName}',
             {
-                hasFirstAndLastName: (params) => params.firstName && params.lastName
-            }
+                hasFirstAndLastName: (params) => params.firstName && params.lastName,
+            },
         );
         assert.equal(
             block.render({
-                firstName: 'Adam'
+                firstName: 'Adam',
             }),
-            ''
+            '',
         );
     });
     it('conditional block with partial and true return', function () {
         const block = new jepy.Template(
             '?{@hasFirstAndLastName}${firstName} ${lastName}?{/@hasFirstAndLastName}',
             {
-                hasFirstAndLastName: (params) => params.firstName && params.lastName
-            }
+                hasFirstAndLastName: (params) => params.firstName && params.lastName,
+            },
         );
         assert.equal(
             block.render({
                 firstName: 'Adam',
-                lastName: 'Smith'
+                lastName: 'Smith',
             }),
-            'Adam Smith'
+            'Adam Smith',
         );
     });
     it('conditional block with partial, not operator and falsey return', function () {
         const block = new jepy.Template('?{!@isLastNameSmith}not ?{/@isLastNameSmith}Smith', {
-            isLastNameSmith: (params) => params.lastName && params.lastName === 'Smith'
+            isLastNameSmith: (params) => params.lastName && params.lastName === 'Smith',
         });
         assert.equal(
             block.render({
-                lastName: 'Wolf'
+                lastName: 'Wolf',
             }),
-            'not Smith'
+            'not Smith',
         );
     });
     it('conditional block with partial, not operator and truly', function () {
         const block = new jepy.Template('?{!@isLastNameSmith}not ?{/@isLastNameSmith}Smith', {
-            isLastNameSmith: (params) => params.lastName && params.lastName === 'Smith'
+            isLastNameSmith: (params) => params.lastName && params.lastName === 'Smith',
         });
         assert.equal(
             block.render({
-                lastName: 'Smith'
+                lastName: 'Smith',
             }),
-            'Smith'
+            'Smith',
         );
     });
     it('space indented text', function () {
@@ -160,51 +160,86 @@ describe('test template block', function () {
             block.render({
                 items: [
                     {
-                        name: 'item1'
+                        name: 'item1',
                     },
                     {
-                        name: 'item2'
-                    }
-                ]
+                        name: 'item2',
+                    },
+                ],
             }),
-            'item1 item2 '
+            'item1 item2 ',
+        );
+    });
+    it('loop variables', function () {
+        const block = new jepy.Template(
+            '#{items}${loop.number}/${loop.size} ${name}' +
+                ' > #{subItems} ${loop.number}/${loop.size} ${name}#{/subItems}?{!loop.last}\n?{/loop.last}#{/items}',
+        );
+        assert.equal(
+            block.render({
+                items: [
+                    {
+                        name: 'item1',
+                        subItems: [
+                            {
+                                name: 'subItem1',
+                            },
+                            {
+                                name: 'subItem2',
+                            },
+                            {
+                                name: 'subItem3',
+                            },
+                        ],
+                    },
+                    {
+                        name: 'item2',
+                        subItems: [
+                            {
+                                name: 'subItem1',
+                            },
+                            {
+                                name: 'subItem2',
+                            },
+                        ],
+                    },
+                ],
+            }),
+            '1/2 item1 >  1/3 subItem1 2/3 subItem2 3/3 subItem3\n2/2 item2 >  1/2 subItem1 2/2 subItem2',
         );
     });
     it('repeating block with alias', function () {
         const block = new jepy.Template('#{items:item}${item} #{/items}');
         assert.equal(
             block.render({
-                items: ['item1', 'item2']
+                items: ['item1', 'item2'],
             }),
-            'item1 item2 '
+            'item1 item2 ',
         );
     });
     it('cached block is returning previously cached value', function () {
         const block = new jepy.Template(
-            '={cachedBlock}cached block ={/cachedBlock}={cachedBlock}={/cachedBlock}'
+            '={cachedBlock}cached block ={/cachedBlock}={cachedBlock}={/cachedBlock}',
         );
         assert.equal(block.render(), 'cached block cached block ');
     });
     it('indent multi line params', function () {
         const block = new jepy.Template(
-`<script type="importmap">
+            `<script type="importmap">
     %{json}
 </script>`,
-            {},
-            true
         );
         assert.equal(
             block.render({
-                json: 
-`{
+                json: `{
     "test": 1
-}`
+}`,
             }),
-`<script type="importmap">
+            `<script type="importmap">
     {
         "test": 1
     }
-</script>`
+</script>`,
         );
     });
 });
@@ -223,7 +258,7 @@ describe('test composite block', function () {
         const block = new jepy.Composite([
             new jepy.Simple('merged '),
             new jepy.Simple('block contents'),
-            new jepy.Conditional(() => true, new jepy.Simple(' are returned'))
+            new jepy.Conditional(() => true, new jepy.Simple(' are returned')),
         ]);
         assert.equal(block.render(), 'merged block contents are returned');
     });
@@ -232,22 +267,22 @@ describe('test repeating block', function () {
     it('returns repeating text', function () {
         const block = new jepy.Repeating(
             'items',
-            new jepy.Template('<a href="${url}">${text}</a>')
+            new jepy.Template('<a href="${url}">${text}</a>'),
         );
         assert.equal(
             block.render({
                 items: [
                     {
                         url: '/home',
-                        text: 'home'
+                        text: 'home',
                     },
                     {
                         url: '/articles',
-                        text: 'articles'
-                    }
-                ]
+                        text: 'articles',
+                    },
+                ],
             }),
-            '<a href="/home">home</a>' + '<a href="/articles">articles</a>'
+            '<a href="/home">home</a>' + '<a href="/articles">articles</a>',
         );
     });
     it('returns repeating text with callback', function () {
@@ -256,17 +291,17 @@ describe('test repeating block', function () {
             new jepy.Template('${prefix} line #${line.number}</br>'),
             (item, params) => {
                 params.line = {
-                    number: item
+                    number: item,
                 };
                 return params;
-            }
+            },
         );
         assert.equal(
             block.render({
                 prefix: 'this is',
-                items: [1, 2, 3]
+                items: [1, 2, 3],
             }),
-            'this is line #1</br>' + 'this is line #2</br>' + 'this is line #3</br>'
+            'this is line #1</br>' + 'this is line #2</br>' + 'this is line #3</br>',
         );
     });
 });
@@ -282,21 +317,21 @@ describe('test complex block chain', function () {
                         '<div>You have ${@numberOfItems} ${@itemText} in your basket</div><ul>',
                         {
                             numberOfItems: (params) => params.items.length,
-                            itemText: (params) => singularOrPlural('item', params.items.length)
-                        }
+                            itemText: (params) => singularOrPlural('item', params.items.length),
+                        },
                     ),
                     new jepy.Repeating(
                         'items',
                         new jepy.Template('<li><a href="${url}">%{@icon}${text}</a></li>', {
                             icon: (params) =>
-                                params.outOfStock ? '<span class="out-of-stock"></span>' : ''
-                        })
+                                params.outOfStock ? '<span class="out-of-stock"></span>' : '',
+                        }),
                     ),
-                    new jepy.Simple('</ul>')
+                    new jepy.Simple('</ul>'),
                 ]),
-                new jepy.Simple('<div>Your basket is empty</div>')
+                new jepy.Simple('<div>Your basket is empty</div>'),
             ),
-            new jepy.Simple('</div>')
+            new jepy.Simple('</div>'),
         ]);
         assert.equal(
             block.render({
@@ -304,38 +339,38 @@ describe('test complex block chain', function () {
                     {
                         url: '/item/1',
                         text: 'Pencil',
-                        outOfStock: false
+                        outOfStock: false,
                     },
                     {
                         url: '/item/2',
                         text: 'Pen',
-                        outOfStock: true
-                    }
-                ]
+                        outOfStock: true,
+                    },
+                ],
             }),
             '<div>Basket:<div>You have 2 items in your basket</div><ul>' +
                 '<li><a href="/item/1">Pencil</a></li>' +
                 '<li><a href="/item/2"><span class="out-of-stock"></span>Pen</a></li>' +
-                '</ul></div>'
+                '</ul></div>',
         );
         assert.equal(
             block.render({
                 items: [
                     {
                         url: '/item/1',
-                        text: 'Pencil'
-                    }
-                ]
+                        text: 'Pencil',
+                    },
+                ],
             }),
             '<div>Basket:<div>You have 1 item in your basket</div><ul>' +
                 '<li><a href="/item/1">Pencil</a></li>' +
-                '</ul></div>'
+                '</ul></div>',
         );
         assert.equal(
             block.render({
-                items: []
+                items: [],
             }),
-            '<div>Basket:<div>Your basket is empty</div></div>'
+            '<div>Basket:<div>Your basket is empty</div></div>',
         );
     });
 });
@@ -349,24 +384,24 @@ describe('test callback block', function () {
             const itemCount = params.items.length;
             const singularOrPlural = (noun, counter) => (counter > 1 ? noun + 's' : noun);
             const basketBlock = new jepy.Template(
-                '<div>You have ${itemCount} ${itemText} in your basket</div>'
+                '<div>You have ${itemCount} ${itemText} in your basket</div>',
             );
             return basketBlock.render({
                 itemCount: itemCount,
-                itemText: singularOrPlural('item', itemCount)
+                itemText: singularOrPlural('item', itemCount),
             });
         });
         assert.equal(
             block.render({
-                items: [1]
+                items: [1],
             }),
-            '<div>You have 1 item in your basket</div>'
+            '<div>You have 1 item in your basket</div>',
         );
         assert.equal(
             block.render({
-                items: [1, 2, 3]
+                items: [1, 2, 3],
             }),
-            '<div>You have 3 items in your basket</div>'
+            '<div>You have 3 items in your basket</div>',
         );
     });
 });
@@ -380,15 +415,15 @@ describe('test cached block', function () {
         const compositeBlock = new jepy.Composite([
             new jepy.Simple('merged '),
             new jepy.Template('<div>${@partial}</div>', {
-                partial: (params) => (params.name === undefined ? '' : 'Hello ' + params.name)
+                partial: (params) => (params.name === undefined ? '' : 'Hello ' + params.name),
             }),
             new jepy.Callback((params) =>
-                params.name === undefined ? '' : 'Hello ' + params.name
+                params.name === undefined ? '' : 'Hello ' + params.name,
             ),
             new jepy.Conditional(
                 (params) => params.name !== undefined,
-                new jepy.Simple(' are returned')
-            )
+                new jepy.Simple(' are returned'),
+            ),
         ]);
         const cachedBlock = new jepy.Cached(compositeBlock, (params, block) => {
             const isValid = block.name === params.name;
@@ -398,12 +433,12 @@ describe('test cached block', function () {
             return isValid;
         });
         const templateParamsOne = {
-            name: 'John'
+            name: 'John',
         };
         const compositeValueOne = compositeBlock.render(templateParamsOne);
         assert.equal(cachedBlock.render(templateParamsOne), compositeValueOne);
         const templateParamsTwo = {
-            name: 'Adam'
+            name: 'Adam',
         };
         const compositeValueTwo = compositeBlock.render(templateParamsTwo);
         assert.equal(cachedBlock.render(templateParamsTwo), compositeValueTwo);
@@ -435,7 +470,7 @@ describe('test indented block', function () {
             `<div>
     test
     me
-</div>`
+</div>`,
         );
         const indentedBlock = new jepy.Indented(simpleBlock, jepy.IndentType.SPACE, 4);
         assert.equal(indentedBlock.render(), '    <div>\n        test\n        me\n    </div>');

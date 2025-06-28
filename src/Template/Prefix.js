@@ -14,7 +14,7 @@ const BlockPrefix = {
     CONDITIONAL: '?',
     TAB_INDENTED: '>',
     SPACE_INDENTED: '_',
-    CACHED: '='
+    CACHED: '=',
 };
 
 export {Prefix, BlockPrefix};

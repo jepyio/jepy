@@ -5,8 +5,8 @@ export default [
         output: {
             file: 'dist/jepy.js',
             format: 'iife',
-            name: 'jepy'
-        }
+            name: 'jepy',
+        },
     },
     {
         input: 'src/index.js',
@@ -14,7 +14,7 @@ export default [
         output: {
             file: 'jepy.jsm',
             format: 'es',
-            name: 'jepy'
-        }
-    }
+            name: 'jepy',
+        },
+    },
 ];

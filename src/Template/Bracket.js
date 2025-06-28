@@ -3,7 +3,7 @@
  */
 const Bracket = {
     OPEN: '{',
-    CLOSE: '}'
+    CLOSE: '}',
 };
 
 export {Bracket};

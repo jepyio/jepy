@@ -3,7 +3,7 @@
  */
 const Glue = {
     PATH: '.',
-    PARAM: ':'
+    PARAM: ':',
 };
 
 export {Glue};

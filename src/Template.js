@@ -57,20 +57,19 @@ class Template {
                     prefix +
                     '\\' +
                     Bracket.OPEN +
-                    '(?<path>\\' + Operator.PARTIAL + '?\\w+(?:\\' +
+                    '(?<path>\\' +
+                    Operator.PARTIAL +
+                    '?\\w+(?:\\' +
                     Glue.PATH +
                     '(\\w|\\_\\-)+)*)' +
                     '\\' +
                     Bracket.CLOSE,
-                'gm'
+                'gm',
             );
             const tags = content.matchAll(tagPattern);
             for (const tag of tags) {
                 const param = callback(tag.groups.path);
-                content = content.replaceAll(
-                    tag[0], 
-                    this.#indentParam(param, tag.groups.indent)
-                );
+                content = content.replaceAll(tag[0], this.#indentParam(param, tag.groups.indent));
             }
         };
         replaceTagsByPrefix(Prefix.RAW, (path) => this.#paramFromPath(path, params));
@@ -139,13 +138,13 @@ class Template {
             .replace(
                 /[\uD800-\uDBFF][\uDC00-\uDFFF]/g,
                 (match) =>
-                    '&#' + (match.charCodeAt(0) * 0x400 + match.charCodeAt(1) - 0x35fdc00) + ';'
+                    '&#' + (match.charCodeAt(0) * 0x400 + match.charCodeAt(1) - 0x35fdc00) + ';',
             );
     }
 
     #build() {
         const escapedBlockPrefixes = Object.values(BlockPrefix).map(
-            (blockPrefix) => '\\' + blockPrefix
+            (blockPrefix) => '\\' + blockPrefix,
         );
         const blockPattern = new RegExp(
             '(?<prefix>[' +
@@ -156,7 +155,9 @@ class Template {
                 '(?<operator>[\\' +
                 Operator.NOT +
                 '])?' +
-                '(?<placeholder>(?<name>\\' + Operator.PARTIAL + '?\\w+(?:\\' +
+                '(?<placeholder>(?<name>\\' +
+                Operator.PARTIAL +
+                '?\\w+(?:\\' +
                 Glue.PATH +
                 '\\w+)*)(?:\\' +
                 Glue.PARAM +
@@ -168,7 +169,7 @@ class Template {
                 '\\/\\k<name>' +
                 '\\' +
                 Bracket.CLOSE,
-            'gm'
+            'gm',
         );
         let counter = 0;
         let matches = [];
@@ -177,7 +178,8 @@ class Template {
             const block = matches[0];
             const blockId = 'block_' + counter;
             counter++;
-            const blockPlaceholder = Prefix.RAW + Bracket.OPEN + Operator.PARTIAL + blockId + Bracket.CLOSE;
+            const blockPlaceholder =
+                Prefix.RAW + Bracket.OPEN + Operator.PARTIAL + blockId + Bracket.CLOSE;
             this.#content = this.#content.replace(block[0], blockPlaceholder);
             blockPartials[blockId] = this.#blockCallback(block);
         }
@@ -210,7 +212,7 @@ class Template {
                         return isFulfilled;
                     },
                     blockTemplate,
-                    new Simple('')
+                    new Simple(''),
                 );
             };
         case BlockPrefix.REPEATING:
@@ -229,7 +231,7 @@ class Template {
                 return new Indented(
                     blockTemplate,
                     prefix === BlockPrefix.TAB_INDENTED ? IndentType.TAB : IndentType.SPACE,
-                    indentLevel
+                    indentLevel,
                 );
             };
         case BlockPrefix.CACHED:
@@ -245,7 +247,6 @@ class Template {
             throw new SyntaxError('unhandled prefix "' + prefix + '"');
         }
     }
-
 }
 
 export {Template};

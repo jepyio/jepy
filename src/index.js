@@ -18,6 +18,6 @@ const jepy = {
     Cached,
     IndentType,
     Indented,
-    Template
+    Template,
 };
 export default jepy;

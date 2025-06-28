@@ -7,38 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- adding the "else" tag to Conditional blocks in jepy.Template to make it more readable and lean
-- adding special parameters like "loop.first" and "loop.last" that could be used inside a Repeating block in jepy.Template
-- adding an option for validation partial to the Cached blocks in jepy.Template
+-   adding the "else" tag to Conditional blocks in jepy.Template to make it more readable and lean
+-   adding an option for validation partial to the Cached blocks in jepy.Template
+
+## [2.2.0] - 2025-06-26
+
+### Added
+
+-   loop.index, loop.first, loop.last, loop.number, loop.size parameters for Repeating blocks
+
+### Fixed
+
+-   removed deprecated bool param from example for multi-line indenting
+-   nested Repeating blocks do not work in jepy.Template
 
 ## [2.1.0] - 2025-06-26
 
 ### Added
 
-- benchmarking with mitata
+-   benchmarking with mitata
 
 ### Changed
 
-- multi-line parameters will now be indented to their placeholder location
-- improved Indented block performance
-- improved Repeating block performance
+-   multi-line parameters will now be indented to their placeholder location
+-   improved Indented block performance
+-   improved Repeating block performance
 
 ## [2.0.1] - 2025-06-24
 
 ### Fixed
 
-- fixed package.json repository url and added versioned cdn link in readme
+-   fixed package.json repository url and added versioned cdn link in readme
 
 ## [2.0.0] - 2025-06-24
 
 ### Added
 
-- added the alias property to the Repeating block, allowing you to encapsulate elements into a named object. this is handy, for example, if you provide an array of strings that you wish to refer to in your template with a specific name
+-   added the alias property to the Repeating block, allowing you to encapsulate elements into a named object. this is handy, for example, if you provide an array of strings that you wish to refer to in your template with a specific name
 
 ### Changed
 
-- jepy.Placeholder changed into jepy.Template with block logic support and expanded capabilities
-- made the @ partial placeholder into an operator that could be used in other placeholder and block logic. for example it is now possible to have an raw %{@partialName} and escaped ${@partialName} partial placeholder
+-   jepy.Placeholder changed into jepy.Template with block logic support and expanded capabilities
+-   made the @ partial placeholder into an operator that could be used in other placeholder and block logic. for example it is now possible to have an raw %{@partialName} and escaped ${@partialName} partial placeholder
 
 ## [1.3.4] - 2023-12-30
 

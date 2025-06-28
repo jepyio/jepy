@@ -80,7 +80,7 @@ class Conditional extends Block {
  */
 const Glue = {
     PATH: '.',
-    PARAM: ':'
+    PARAM: ':',
 };
 
 /**
@@ -134,17 +134,27 @@ class Repeating extends Block {
      */
     render(params) {
         let items = paramFromPath(this.#path, params);
+        const size = items.length;
+        const lastIndex = size - 1;
         return items
-            .map((item) => {
+            .map((item, index) => {
                 if (this.#alias) {
-                    item = Object.defineProperty({}, this.#alias, {
-                        value: item
-                    });
+                    item = {
+                        [this.#alias]: item,
+                    };
                 }
                 if (this.#callback) {
                     item = this.#callback(item, params);
                 }
-                return this.#repeatingBlock.render(Object.assign(item, params));
+                let loopParams = Object.assign({}, params, item);
+                loopParams.loop = {
+                    index,
+                    first: index === 0,
+                    last: index === lastIndex,
+                    number: index + 1,
+                    size,
+                };
+                return this.#repeatingBlock.render(loopParams);
             })
             .join('');
     }
@@ -246,7 +256,7 @@ class Cached extends Block {
  */
 const IndentType = {
     SPACE: ' ',
-    TAB: '\t'
+    TAB: '\t',
 };
 
 /**
@@ -285,7 +295,6 @@ class Indented extends Block {
         }
         return indent + content;
     }
-
 }
 
 /**
@@ -304,7 +313,7 @@ const BlockPrefix = {
     CONDITIONAL: '?',
     TAB_INDENTED: '>',
     SPACE_INDENTED: '_',
-    CACHED: '='
+    CACHED: '=',
 };
 
 /**
@@ -312,7 +321,7 @@ const BlockPrefix = {
  */
 const Bracket = {
     OPEN: '{',
-    CLOSE: '}'
+    CLOSE: '}',
 };
 
 /**
@@ -370,20 +379,19 @@ class Template {
                     prefix +
                     '\\' +
                     Bracket.OPEN +
-                    '(?<path>\\' + Operator.PARTIAL + '?\\w+(?:\\' +
+                    '(?<path>\\' +
+                    Operator.PARTIAL +
+                    '?\\w+(?:\\' +
                     Glue.PATH +
                     '(\\w|\\_\\-)+)*)' +
                     '\\' +
                     Bracket.CLOSE,
-                'gm'
+                'gm',
             );
             const tags = content.matchAll(tagPattern);
             for (const tag of tags) {
                 const param = callback(tag.groups.path);
-                content = content.replaceAll(
-                    tag[0], 
-                    this.#indentParam(param, tag.groups.indent)
-                );
+                content = content.replaceAll(tag[0], this.#indentParam(param, tag.groups.indent));
             }
         };
         replaceTagsByPrefix(Prefix.RAW, (path) => this.#paramFromPath(path, params));
@@ -452,13 +460,13 @@ class Template {
             .replace(
                 /[\uD800-\uDBFF][\uDC00-\uDFFF]/g,
                 (match) =>
-                    '&#' + (match.charCodeAt(0) * 0x400 + match.charCodeAt(1) - 0x35fdc00) + ';'
+                    '&#' + (match.charCodeAt(0) * 0x400 + match.charCodeAt(1) - 0x35fdc00) + ';',
             );
     }
 
     #build() {
         const escapedBlockPrefixes = Object.values(BlockPrefix).map(
-            (blockPrefix) => '\\' + blockPrefix
+            (blockPrefix) => '\\' + blockPrefix,
         );
         const blockPattern = new RegExp(
             '(?<prefix>[' +
@@ -469,7 +477,9 @@ class Template {
                 '(?<operator>[\\' +
                 Operator.NOT +
                 '])?' +
-                '(?<placeholder>(?<name>\\' + Operator.PARTIAL + '?\\w+(?:\\' +
+                '(?<placeholder>(?<name>\\' +
+                Operator.PARTIAL +
+                '?\\w+(?:\\' +
                 Glue.PATH +
                 '\\w+)*)(?:\\' +
                 Glue.PARAM +
@@ -481,7 +491,7 @@ class Template {
                 '\\/\\k<name>' +
                 '\\' +
                 Bracket.CLOSE,
-            'gm'
+            'gm',
         );
         let counter = 0;
         let matches = [];
@@ -490,7 +500,8 @@ class Template {
             const block = matches[0];
             const blockId = 'block_' + counter;
             counter++;
-            const blockPlaceholder = Prefix.RAW + Bracket.OPEN + Operator.PARTIAL + blockId + Bracket.CLOSE;
+            const blockPlaceholder =
+                Prefix.RAW + Bracket.OPEN + Operator.PARTIAL + blockId + Bracket.CLOSE;
             this.#content = this.#content.replace(block[0], blockPlaceholder);
             blockPartials[blockId] = this.#blockCallback(block);
         }
@@ -523,7 +534,7 @@ class Template {
                         return isFulfilled;
                     },
                     blockTemplate,
-                    new Simple('')
+                    new Simple(''),
                 );
             };
         case BlockPrefix.REPEATING:
@@ -542,7 +553,7 @@ class Template {
                 return new Indented(
                     blockTemplate,
                     prefix === BlockPrefix.TAB_INDENTED ? IndentType.TAB : IndentType.SPACE,
-                    indentLevel
+                    indentLevel,
                 );
             };
         case BlockPrefix.CACHED:
@@ -558,7 +569,6 @@ class Template {
             throw new SyntaxError('unhandled prefix "' + prefix + '"');
         }
     }
-
 }
 
 const jepy = {
@@ -571,7 +581,7 @@ const jepy = {
     Cached,
     IndentType,
     Indented,
-    Template
+    Template,
 };
 
 export { jepy as default };

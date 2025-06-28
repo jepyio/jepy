@@ -5,7 +5,7 @@ import {Block} from '../Block.js';
  */
 const IndentType = {
     SPACE: ' ',
-    TAB: '\t'
+    TAB: '\t',
 };
 
 /**
@@ -44,7 +44,6 @@ class Indented extends Block {
         }
         return indent + content;
     }
-
 }
 
 export {Indented, IndentType};

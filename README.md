@@ -62,7 +62,7 @@ Latest major version:
 Specific version (recommended to avoid breaking changes):
 
 ```
-<script src="https://cdn.jsdelivr.net/npm/jepy@2.0.0/dist/jepy.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jepy@2.2.0/dist/jepy.min.js"></script>
 ```
 
 ### npm
@@ -83,6 +83,8 @@ The most powerful and adaptable building block available. This will fulfil most 
 
 #### jepy.Template with raw value
 
+This could be useful if you need to insert HTML into your template
+
 ```javascript
 const templateBlock = new jepy.Template('<div>%{text}</div>');
 templateBlock.render({
@@ -93,11 +95,13 @@ templateBlock.render({
 
 #### jepy.Template with escaped value
 
+This will escape special characters in the param you are passing to this
+
 ```javascript
 const templateBlock = new jepy.Template('<div>${values.text}</div>');
 templateBlock.render({
     values: {
-        text: '<img src="test.jpg">'
+        text: '<img src="test.jpg">',
     },
 });
 // output: <div>&#60;img src=&#34;test.jpg&#34;&#62;</div>
@@ -105,12 +109,17 @@ templateBlock.render({
 
 #### jepy.Template with partials
 
+Partials can be used to add advanced fetures to your template. These could refer to a string, Block or a callback
+
 ```javascript
-const templateBlock = new jepy.Template('%{@rawPartialString}${@escapedPartialBlock}%{@rawPartialCallback}', {
-    rawPartialString: '<img ',
-    escapedPartialBlock: new jepy.Template('src="${imageUrl}"'),
-    rawPartialCallback: (params) => params.endChar,
-});
+const templateBlock = new jepy.Template(
+    '%{@rawPartialString}${@escapedPartialBlock}%{@rawPartialCallback}',
+    {
+        rawPartialString: '<img ',
+        escapedPartialBlock: new jepy.Template('src="${imageUrl}"'),
+        rawPartialCallback: (params) => params.endChar,
+    },
+);
 templateBlock.render({
     imageUrl: 'test.jpg',
     endChar: '>',
@@ -120,8 +129,12 @@ templateBlock.render({
 
 #### jepy.Template with Conditional Block against a parameter
 
+This is your simple "if ..." building block. It is useful to build a simple logic based on a parameter
+
 ```javascript
-const templateBlock = new jepy.Template('Hello ?{firstName}${firstName}?{/firstName}?{!firstName}guest?{/firstName}!');
+const templateBlock = new jepy.Template(
+    'Hello ?{firstName}${firstName}?{/firstName}?{!firstName}guest?{/firstName}!',
+);
 templateBlock.render({
     firstName: 'Adam',
 });
@@ -134,13 +147,12 @@ templateBlock.render({
 
 #### jepy.Template with Conditional Block against a partial
 
+This is your more advance "if ..." building block with a custom criteria
+
 ```javascript
-const templateBlock = new jepy.Template(
-    'You are?{!@isSmith} not?{/@isSmith}? a Smith',
-    {
-        isSmith: (params) => params.lastName === 'Smith'
-    }
-);
+const templateBlock = new jepy.Template('You are?{!@isSmith} not?{/@isSmith}? a Smith', {
+    isSmith: (params) => params.lastName === 'Smith',
+});
 templateBlock.render({
     lastName: 'Smith',
 });
@@ -153,32 +165,35 @@ templateBlock.render({
 
 #### jepy.Template with simple Repeating Block
 
+This is your "foreach ..." building block. You may use the loop.index, loop.first, loop.last, loop.number, and loop.size parameters inside this block to render or set criteria against it
+
 ```javascript
-const templateBlock = new jepy.Template('#{items}${name} ?{!inStock}[Not in stock]?{/inStock},#{/items}');
+const templateBlock = new jepy.Template(
+    '#{items}#${loop.number} - ${name} ?{!inStock}[Not in stock]?{/inStock}?{!loop.last}, ?{/loop.last}#{/items}',
+);
 templateBlock.render({
     items: [
         {
             name: 'pen',
-            inStock: true
+            inStock: true,
         },
         {
             name: 'apple',
-            inStock: false
+            inStock: false,
         },
     ],
 });
-// output: pen,apple [Not in stock],
+// output: #1 - pen, #2 - apple [Not in stock]
 ```
 
 #### jepy.Template with Repeating Block using an alias
 
+This is your "foreach ... as ..." building block. It is useful when you have an array of items that you cannot refer by name
+
 ```javascript
 const templateBlock = new jepy.Template('#{items:item}${item},#{/items}');
 templateBlock.render({
-    items: [
-        'apple',
-        'pen'
-    ],
+    items: ['apple', 'pen'],
 });
 // output: apple,pen,
 ```
@@ -206,11 +221,13 @@ templateBlock.render({
 #### jepy.Template with Cached Block
 
 ```javascript
-const templateBlock = new jepy.Template('={cachedBlock}${text} ={/cachedBlock}={cachedBlock}={/cachedBlock}');
+const templateBlock = new jepy.Template(
+    '={cachedBlock}${text} ={/cachedBlock}={cachedBlock}={/cachedBlock}',
+);
 templateBlock.render({
     text: 'cached text',
 });
-// output: cached text cached text 
+// output: cached text cached text
 ```
 
 ### jepy.Simple
@@ -231,13 +248,13 @@ This is your "if ... else ..." building block. It needs a function to check the 
 // without optional "else"
 const conditionalBlock = new jepy.Conditional(
     (params) => params.who !== undefined,
-    new jepy.Template('<div>Hello ${who}</div>')
+    new jepy.Template('<div>Hello ${who}</div>'),
 );
 conditionalBlock.render();
 // output:
 
 conditionalBlock.render({
-    who: 'World'
+    who: 'World',
 });
 // output: <div>Hello World</div>
 
@@ -245,13 +262,13 @@ conditionalBlock.render({
 const conditionalBlock = new jepy.Conditional(
     (params) => params.who !== undefined,
     new jepy.Template('<div>Hello ${who}</div>'),
-    new jepy.Simple("<div>Sorry, I don't have your name</div>")
+    new jepy.Simple("<div>Sorry, I don't have your name</div>"),
 );
 conditionalBlock.render();
 // output: <div>Sorry, I don\'t have your name</div>
 
 conditionalBlock.render({
-    who: 'Adam'
+    who: 'Adam',
 });
 // output: <div>Hello Adam</div>
 ```
@@ -262,21 +279,18 @@ This is your "foreach ..." building block. This needs a path (same format as the
 
 ```javascript
 // without parameter modifier function
-const repeatingBlock = new jepy.Repeating(
-    'items',
-    new jepy.Template('<div>#${id} ${name}</div>')
-);
+const repeatingBlock = new jepy.Repeating('items', new jepy.Template('<div>#${id} ${name}</div>'));
 repeatingBlock.render({
     items: [
         {
             id: 1,
-            name: 'first'
+            name: 'first',
         },
         {
             id: 2,
-            name: 'second'
-        }
-    ]
+            name: 'second',
+        },
+    ],
 });
 // output: <div>#1 first</div><div>#2 second</div>
 
@@ -287,20 +301,20 @@ const repeatingBlock = new jepy.Repeating(
     (item, params) => {
         item.name = params.itemName;
         return item;
-    }
+    },
 );
 repeatingBlock.render({
     itemName: 'pencil',
     items: [
         {
             id: 1,
-            colour: 'green'
+            colour: 'green',
         },
         {
             id: 2,
-            colour: 'red'
-        }
-    ]
+            colour: 'red',
+        },
+    ],
 });
 // output: <div>#1 green pencil</div><div>#2 red pencil</div>
 ```
@@ -314,20 +328,20 @@ const compositeBlock = new jepy.Composite([
     new jepy.Simple('<div>'),
     new jepy.Template('<div>Hello ${who}</div>'),
     new jepy.Repeating('items', new jepy.Template('<div>#${id} ${name}</div>')),
-    new jepy.Simple('</div>')
+    new jepy.Simple('</div>'),
 ]);
 compositeBlock.render({
     who: 'World',
     items: [
         {
             id: 1,
-            name: 'first'
+            name: 'first',
         },
         {
             id: 2,
-            name: 'second'
-        }
-    ]
+            name: 'second',
+        },
+    ],
 });
 // output: <div><div>Hello World</div><div>#1 first</div><div>#2 second</div></div>
 ```
@@ -341,15 +355,15 @@ const callbackBlock = new jepy.Callback((params) => {
     const itemCount = params.items.length;
     const singularOrPlural = (noun, counter) => (counter > 1 ? noun + 's' : noun);
     const basketBlock = new jepy.Template(
-        '<div>You have ${itemCount} ${itemText} in your basket</div>'
+        '<div>You have ${itemCount} ${itemText} in your basket</div>',
     );
     return basketBlock.render({
         itemCount: itemCount,
-        itemText: singularOrPlural('item', itemCount)
+        itemText: singularOrPlural('item', itemCount),
     });
 });
 callbackBlock.render({
-    items: ['pineapple', 'pen']
+    items: ['pineapple', 'pen'],
 });
 // output: <div>You have 2 items in your basket</div>
 ```
@@ -362,9 +376,9 @@ It will return the cached value of a Block on subsequent render requests to boos
 const cachedBlock = new jepy.Cached(
     new jepy.Composite([
         new jepy.Callback((params) =>
-            params.name === undefined ? '' : 'Hello ' + params.name + '.'
+            params.name === undefined ? '' : 'Hello ' + params.name + '.',
         ),
-        new jepy.Simple('This is a test')
+        new jepy.Simple('This is a test'),
     ]),
     (params, block) => {
         const isValid = block.name === params.name;
@@ -372,10 +386,10 @@ const cachedBlock = new jepy.Cached(
             block.name = params.name;
         }
         return isValid;
-    }
+    },
 );
 const templateParams = {
-    name: 'Adam'
+    name: 'Adam',
 };
 cachedBlock.render(templateParams);
 // output (non-cached, rendered in runtime): Hello Adam. This is a test
@@ -422,8 +436,8 @@ compositeBlock.render(templateParams);
 -   [x] Add basic building blocks and Block interface for custom classes
 -   [x] Improve the "Usage" part of this README
 -   [x] Add optional parser to generate and cache blocks based on a simple template format
+-   [x] Add special parameters like "loop.first" and "loop.last" that could be used inside a Repeating block in jepy.Template
 -   [ ] Add the "else" tag to Conditional blocks in jepy.Template to make it more readable and lean
--   [ ] Add special parameters like "loop.first" and "loop.last" that could be used inside a Repeating block in jepy.Template
 -   [ ] Add an option for validation partial to the Cached blocks in jepy.Template
 
 See the [open issues](https://github.com/jepyio/jepy/issues) for a full list of proposed features (and known issues).

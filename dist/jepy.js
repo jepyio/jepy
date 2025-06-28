@@ -83,7 +83,7 @@ var jepy = (function () {
      */
     const Glue = {
         PATH: '.',
-        PARAM: ':'
+        PARAM: ':',
     };
 
     /**
@@ -137,17 +137,27 @@ var jepy = (function () {
          */
         render(params) {
             let items = paramFromPath(this.#path, params);
+            const size = items.length;
+            const lastIndex = size - 1;
             return items
-                .map((item) => {
+                .map((item, index) => {
                     if (this.#alias) {
-                        item = Object.defineProperty({}, this.#alias, {
-                            value: item
-                        });
+                        item = {
+                            [this.#alias]: item,
+                        };
                     }
                     if (this.#callback) {
                         item = this.#callback(item, params);
                     }
-                    return this.#repeatingBlock.render(Object.assign(item, params));
+                    let loopParams = Object.assign({}, params, item);
+                    loopParams.loop = {
+                        index,
+                        first: index === 0,
+                        last: index === lastIndex,
+                        number: index + 1,
+                        size,
+                    };
+                    return this.#repeatingBlock.render(loopParams);
                 })
                 .join('');
         }
@@ -249,7 +259,7 @@ var jepy = (function () {
      */
     const IndentType = {
         SPACE: ' ',
-        TAB: '\t'
+        TAB: '\t',
     };
 
     /**
@@ -288,7 +298,6 @@ var jepy = (function () {
             }
             return indent + content;
         }
-
     }
 
     /**
@@ -307,7 +316,7 @@ var jepy = (function () {
         CONDITIONAL: '?',
         TAB_INDENTED: '>',
         SPACE_INDENTED: '_',
-        CACHED: '='
+        CACHED: '=',
     };
 
     /**
@@ -315,7 +324,7 @@ var jepy = (function () {
      */
     const Bracket = {
         OPEN: '{',
-        CLOSE: '}'
+        CLOSE: '}',
     };
 
     /**
@@ -373,20 +382,19 @@ var jepy = (function () {
                         prefix +
                         '\\' +
                         Bracket.OPEN +
-                        '(?<path>\\' + Operator.PARTIAL + '?\\w+(?:\\' +
+                        '(?<path>\\' +
+                        Operator.PARTIAL +
+                        '?\\w+(?:\\' +
                         Glue.PATH +
                         '(\\w|\\_\\-)+)*)' +
                         '\\' +
                         Bracket.CLOSE,
-                    'gm'
+                    'gm',
                 );
                 const tags = content.matchAll(tagPattern);
                 for (const tag of tags) {
                     const param = callback(tag.groups.path);
-                    content = content.replaceAll(
-                        tag[0], 
-                        this.#indentParam(param, tag.groups.indent)
-                    );
+                    content = content.replaceAll(tag[0], this.#indentParam(param, tag.groups.indent));
                 }
             };
             replaceTagsByPrefix(Prefix.RAW, (path) => this.#paramFromPath(path, params));
@@ -455,13 +463,13 @@ var jepy = (function () {
                 .replace(
                     /[\uD800-\uDBFF][\uDC00-\uDFFF]/g,
                     (match) =>
-                        '&#' + (match.charCodeAt(0) * 0x400 + match.charCodeAt(1) - 0x35fdc00) + ';'
+                        '&#' + (match.charCodeAt(0) * 0x400 + match.charCodeAt(1) - 0x35fdc00) + ';',
                 );
         }
 
         #build() {
             const escapedBlockPrefixes = Object.values(BlockPrefix).map(
-                (blockPrefix) => '\\' + blockPrefix
+                (blockPrefix) => '\\' + blockPrefix,
             );
             const blockPattern = new RegExp(
                 '(?<prefix>[' +
@@ -472,7 +480,9 @@ var jepy = (function () {
                     '(?<operator>[\\' +
                     Operator.NOT +
                     '])?' +
-                    '(?<placeholder>(?<name>\\' + Operator.PARTIAL + '?\\w+(?:\\' +
+                    '(?<placeholder>(?<name>\\' +
+                    Operator.PARTIAL +
+                    '?\\w+(?:\\' +
                     Glue.PATH +
                     '\\w+)*)(?:\\' +
                     Glue.PARAM +
@@ -484,7 +494,7 @@ var jepy = (function () {
                     '\\/\\k<name>' +
                     '\\' +
                     Bracket.CLOSE,
-                'gm'
+                'gm',
             );
             let counter = 0;
             let matches = [];
@@ -493,7 +503,8 @@ var jepy = (function () {
                 const block = matches[0];
                 const blockId = 'block_' + counter;
                 counter++;
-                const blockPlaceholder = Prefix.RAW + Bracket.OPEN + Operator.PARTIAL + blockId + Bracket.CLOSE;
+                const blockPlaceholder =
+                    Prefix.RAW + Bracket.OPEN + Operator.PARTIAL + blockId + Bracket.CLOSE;
                 this.#content = this.#content.replace(block[0], blockPlaceholder);
                 blockPartials[blockId] = this.#blockCallback(block);
             }
@@ -526,7 +537,7 @@ var jepy = (function () {
                             return isFulfilled;
                         },
                         blockTemplate,
-                        new Simple('')
+                        new Simple(''),
                     );
                 };
             case BlockPrefix.REPEATING:
@@ -545,7 +556,7 @@ var jepy = (function () {
                     return new Indented(
                         blockTemplate,
                         prefix === BlockPrefix.TAB_INDENTED ? IndentType.TAB : IndentType.SPACE,
-                        indentLevel
+                        indentLevel,
                     );
                 };
             case BlockPrefix.CACHED:
@@ -561,7 +572,6 @@ var jepy = (function () {
                 throw new SyntaxError('unhandled prefix "' + prefix + '"');
             }
         }
-
     }
 
     const jepy = {
@@ -574,7 +584,7 @@ var jepy = (function () {
         Cached,
         IndentType,
         Indented,
-        Template
+        Template,
     };
 
     return jepy;

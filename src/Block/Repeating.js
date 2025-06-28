@@ -39,17 +39,27 @@ class Repeating extends Block {
      */
     render(params) {
         let items = paramFromPath(this.#path, params);
+        const size = items.length;
+        const lastIndex = size - 1;
         return items
-            .map((item) => {
+            .map((item, index) => {
                 if (this.#alias) {
-                    item = Object.defineProperty({}, this.#alias, {
-                        value: item
-                    });
+                    item = {
+                        [this.#alias]: item,
+                    };
                 }
                 if (this.#callback) {
                     item = this.#callback(item, params);
                 }
-                return this.#repeatingBlock.render(Object.assign(item, params));
+                let loopParams = Object.assign({}, params, item);
+                loopParams.loop = {
+                    index,
+                    first: index === 0,
+                    last: index === lastIndex,
+                    number: index + 1,
+                    size,
+                };
+                return this.#repeatingBlock.render(loopParams);
             })
             .join('');
     }
