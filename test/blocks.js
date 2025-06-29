@@ -142,6 +142,50 @@ describe('test template block', function () {
             'Smith',
         );
     });
+    it('conditional block with else tag with truly', function () {
+        const block = new jepy.Template(
+            'Hello ?{firstName}${firstName}?{!firstName}guest?{/firstName}',
+        );
+        assert.equal(
+            block.render({
+                firstName: 'Adam',
+            }),
+            'Hello Adam',
+        );
+    });
+    it('conditional block with else tag with falsy', function () {
+        const block = new jepy.Template(
+            'Hello ?{firstName}${firstName}?{!firstName}guest?{/firstName}',
+        );
+        assert.equal(
+            block.render({
+                firstName: '',
+            }),
+            'Hello guest',
+        );
+    });
+    it('conditional block with else tag with not operator and truly', function () {
+        const block = new jepy.Template(
+            'Hello ?{!firstName}guest?{firstName}${firstName}?{/firstName}',
+        );
+        assert.equal(
+            block.render({
+                firstName: 'Adam',
+            }),
+            'Hello Adam',
+        );
+    });
+    it('conditional block with else tag with not operator and falsy', function () {
+        const block = new jepy.Template(
+            'Hello ?{!firstName}guest?{firstName}${firstName}?{/firstName}',
+        );
+        assert.equal(
+            block.render({
+                firstName: '',
+            }),
+            'Hello guest',
+        );
+    });
     it('space indented text', function () {
         const block = new jepy.Template('_{test:4}space indented text_{/test}');
         assert.equal(block.render(), '    space indented text');

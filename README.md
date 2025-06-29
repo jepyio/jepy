@@ -62,7 +62,7 @@ Latest major version:
 Specific version (recommended to avoid breaking changes):
 
 ```
-<script src="https://cdn.jsdelivr.net/npm/jepy@2.2.0/dist/jepy.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jepy@2.3.0/dist/jepy.min.js"></script>
 ```
 
 ### npm
@@ -129,11 +129,11 @@ templateBlock.render({
 
 #### jepy.Template with Conditional Block against a parameter
 
-This is your simple "if ..." building block. It is useful to build a simple logic based on a parameter
+This is your simple "if ... else ..." building block. It is useful to build a simple logic based on a parameter
 
 ```javascript
 const templateBlock = new jepy.Template(
-    'Hello ?{firstName}${firstName}?{/firstName}?{!firstName}guest?{/firstName}!',
+    'Hello ?{firstName}${firstName}?{!firstName}guest?{/firstName}!',
 );
 templateBlock.render({
     firstName: 'Adam',
@@ -147,7 +147,7 @@ templateBlock.render({
 
 #### jepy.Template with Conditional Block against a partial
 
-This is your more advance "if ..." building block with a custom criteria
+This is your more advance "if ... else ..." building block with a custom criteria
 
 ```javascript
 const templateBlock = new jepy.Template('You are?{!@isSmith} not?{/@isSmith}? a Smith', {
@@ -437,7 +437,7 @@ compositeBlock.render(templateParams);
 -   [x] Improve the "Usage" part of this README
 -   [x] Add optional parser to generate and cache blocks based on a simple template format
 -   [x] Add special parameters like "loop.first" and "loop.last" that could be used inside a Repeating block in jepy.Template
--   [ ] Add the "else" tag to Conditional blocks in jepy.Template to make it more readable and lean
+-   [x] Add the "else" tag to Conditional blocks in jepy.Template to make it more readable and lean
 -   [ ] Add an option for validation partial to the Cached blocks in jepy.Template
 
 See the [open issues](https://github.com/jepyio/jepy/issues) for a full list of proposed features (and known issues).
