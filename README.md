@@ -62,7 +62,7 @@ Latest major version:
 Specific version (recommended to avoid breaking changes):
 
 ```
-<script src="https://cdn.jsdelivr.net/npm/jepy@2.2.0/dist/jepy.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jepy@2.3.0/dist/jepy.min.js"></script>
 ```
 
 ### npm
@@ -129,11 +129,11 @@ templateBlock.render({
 
 #### jepy.Template with Conditional Block against a parameter
 
-This is your simple "if ..." building block. It is useful to build a simple logic based on a parameter
+This is your simple "if ... else ..." building block. It is useful to build a simple logic based on a parameter
 
 ```javascript
 const templateBlock = new jepy.Template(
-    'Hello ?{firstName}${firstName}?{/firstName}?{!firstName}guest?{/firstName}!',
+    'Hello ?{firstName}${firstName}?{!firstName}guest?{/firstName}!',
 );
 templateBlock.render({
     firstName: 'Adam',

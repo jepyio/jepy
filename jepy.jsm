@@ -328,6 +328,7 @@ const Bracket = {
  * @enum {String}
  */
 const Operator = {
+    NULL: '',
     NOT: '!',
     PARTIAL: '@',
 };
@@ -364,6 +365,9 @@ class Template {
      * @return {String}
      */
     render(params = {}) {
+        if (!this.#content) {
+            return '';
+        }
         if (!this.#initialised) {
             this.#build();
         }
@@ -517,10 +521,24 @@ class Template {
         const prefix = block.groups.prefix;
         const placeholder = block.groups.placeholder;
         const partials = Object.assign({}, this.#partials);
-        const blockTemplate = new Template(block.groups.content, partials);
         switch (prefix) {
         case BlockPrefix.CONDITIONAL:
             return (params) => {
+                let contentOnTrue = block.groups.content;
+                let contentOnFalse = '';
+                const expectsFalse = block.groups.operator === Operator.NOT;
+                const elseTag =
+                        BlockPrefix.CONDITIONAL +
+                        Bracket.OPEN +
+                        (expectsFalse ? Operator.NULL : Operator.NOT) +
+                        placeholder +
+                        Bracket.CLOSE;
+                const hasElseTag = contentOnTrue.includes(elseTag);
+                if (hasElseTag) {
+                    const contentParts = contentOnTrue.split(elseTag);
+                    contentOnTrue = contentParts[0];
+                    contentOnFalse = contentParts[1];
+                }
                 return new Conditional(
                     () => {
                         const param = this.#paramFromPath(placeholder, params);
@@ -528,13 +546,12 @@ class Template {
                                 !param ||
                                 (Object.hasOwn(param, 'length') && param.length === 0) ||
                                 (typeof param === 'object' && Object.keys(param).length === 0);
-                        const expectsFalse = block.groups.operator === Operator.NOT;
                         const isFulfilled =
                                 (isFalse && expectsFalse) || (!isFalse && !expectsFalse);
                         return isFulfilled;
                     },
-                    blockTemplate,
-                    new Simple(''),
+                    new Template(contentOnTrue, partials),
+                    new Template(contentOnFalse, partials),
                 );
             };
         case BlockPrefix.REPEATING:
@@ -542,7 +559,12 @@ class Template {
                 const parts = placeholder.split(Glue.PARAM);
                 const path = parts.at(0);
                 const alias = placeholder.includes(Glue.PARAM) ? parts.at(1) : '';
-                return new Repeating(path, blockTemplate, (item) => item, alias);
+                return new Repeating(
+                    path,
+                    new Template(block.groups.content, partials),
+                    (item) => item,
+                    alias,
+                );
             };
         case BlockPrefix.TAB_INDENTED:
         case BlockPrefix.SPACE_INDENTED:
@@ -551,7 +573,7 @@ class Template {
                     ? parseInt(placeholder.split(Glue.PARAM).at(1))
                     : 0;
                 return new Indented(
-                    blockTemplate,
+                    new Template(block.groups.content, partials),
                     prefix === BlockPrefix.TAB_INDENTED ? IndentType.TAB : IndentType.SPACE,
                     indentLevel,
                 );
@@ -561,7 +583,9 @@ class Template {
                 const parts = placeholder.split(Glue.PARAM);
                 const cacheName = 'cached_' + parts.at(0);
                 if (!Object.hasOwn(this.#partials, cacheName)) {
-                    this.#partials[cacheName] = new Cached(blockTemplate);
+                    this.#partials[cacheName] = new Cached(
+                        new Template(block.groups.content, partials),
+                    );
                 }
                 return this.#partials[cacheName];
             };

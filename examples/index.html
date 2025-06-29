@@ -66,7 +66,7 @@
             const randomJokeExample = new jepy.Template(
                 '<div>Hi ${user.name}!</div>'
                     + '<div class="mt_16 p_16 bg_slate-30 rounded_8">'
-                    + '?{@hasJokes}<div>Here is your random joke:</div><div><strong>${@randomJoke}</strong></div>?{/@hasJokes}'
+                    + '?{@hasJokes}<div>Here is your random joke:</div><div><strong>${@randomJoke}</strong></div>'
                     + '?{!@hasJokes}<div>Sorry, I\'m out of jokes at the moment</div>?{/@hasJokes}'
                     + '</div>',
                 {
@@ -104,7 +104,6 @@
                     + '<div class="ml_8"><ul>'
                     + '#{items}<li class="flex_row mt_4"><a href="${url}">${text}</a>%{@status}</li>#{/items}'
                     + '</ul></div>'
-                    + '?{/@hasItems}'
                     + '?{!@hasItems}<div>Your basket is empty</div>?{/@hasItems}'
                     + '</div>',
                 {

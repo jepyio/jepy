@@ -47,12 +47,12 @@ const complexTemplate = new jepy.Template(
 Fusce nisi neque, cursus quis justo vel, vulputate molestie massa. Suspendisse ut dignissim risus. Proin nunc velit, egestas nec congue at, volutpat luctus justo. Suspendisse pulvinar scelerisque euismod. Proin vitae nulla risus. Mauris a feugiat est, imperdiet maximus lorem. Nam placerat, libero ac facilisis condimentum, urna dui accumsan nibh, in tristique tortor velit ut nibh.
 _{spaceIndented:20}\${multiLine}_{/spaceIndented}
 >{tabIndented:10}\${multiLine}>{/tabIndented}%{@value}
-?{value}a?{/value}?{!value}a?{/value}
-?{items}a?{/items}?{!items}a?{/items}
-?{arrayItems}a?{/arrayItems}?{!arrayItems}a?{/arrayItems}
-?{@true}a?{/@true}?{!@true}a?{/@true}
-?{@number}a?{/@number}?{!@number}a?{/@number}
-?{@value}a?{/@value}?{!@value}a?{/@value}
+?{value}a?{!value}a?{/value}
+?{items}a?{!items}a?{/items}
+?{arrayItems}a?{!arrayItems}a?{/arrayItems}
+?{@true}a?{!@true}a?{/@true}
+?{@number}a?{!@number}a?{/@number}
+?{@value}a?{!@value}a?{/@value}
 #{items}\${name}#{/items}
 #{arrayItems:item}\${item}#{/arrayItems}
 ={cachedBlock}cached block ={/cachedBlock}={cachedBlock}={/cachedBlock}={cachedBlock}={/cachedBlock}

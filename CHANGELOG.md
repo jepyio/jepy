@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
--   adding the "else" tag to Conditional blocks in jepy.Template to make it more readable and lean
 -   adding an option for validation partial to the Cached blocks in jepy.Template
+
+## [2.3.0] - 2025-06-29
+
+### Added
+
+-   "else" tag to Conditional blocks in jepy.Template to make it more readable and lean
 
 ## [2.2.0] - 2025-06-26
 
