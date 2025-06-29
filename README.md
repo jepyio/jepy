@@ -147,7 +147,7 @@ templateBlock.render({
 
 #### jepy.Template with Conditional Block against a partial
 
-This is your more advance "if ..." building block with a custom criteria
+This is your more advance "if ... else ..." building block with a custom criteria
 
 ```javascript
 const templateBlock = new jepy.Template('You are?{!@isSmith} not?{/@isSmith}? a Smith', {
@@ -437,7 +437,7 @@ compositeBlock.render(templateParams);
 -   [x] Improve the "Usage" part of this README
 -   [x] Add optional parser to generate and cache blocks based on a simple template format
 -   [x] Add special parameters like "loop.first" and "loop.last" that could be used inside a Repeating block in jepy.Template
--   [ ] Add the "else" tag to Conditional blocks in jepy.Template to make it more readable and lean
+-   [x] Add the "else" tag to Conditional blocks in jepy.Template to make it more readable and lean
 -   [ ] Add an option for validation partial to the Cached blocks in jepy.Template
 
 See the [open issues](https://github.com/jepyio/jepy/issues) for a full list of proposed features (and known issues).
