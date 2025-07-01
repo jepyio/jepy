@@ -27,6 +27,19 @@ bench('repeating block with alias', () =>
     }),
 );
 
+let placeholderStressTestTemplateString = '';
+for (let i = 0; i < 1000; i++) {
+    placeholderStressTestTemplateString += '${test}%{test}${@test}%{@test}';
+}
+const placeholderStressTestTemplate = new jepy.Template(placeholderStressTestTemplateString, {
+    test: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla scelerisque metus at quam auctor accumsan.',
+});
+bench('placeholder stress test', () =>
+    placeholderStressTestTemplate.render({
+        test: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla scelerisque metus at quam auctor accumsan.',
+    }),
+);
+
 let linesToIndent = [];
 for (let i = 0; i < 500; i++) {
     linesToIndent.push('Lorem ipsum dolor sit amet');

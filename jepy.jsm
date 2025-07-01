@@ -383,11 +383,9 @@ class Template {
                     prefix +
                     '\\' +
                     Bracket.OPEN +
-                    '(?<path>\\' +
-                    Operator.PARTIAL +
-                    '?\\w+(?:\\' +
-                    Glue.PATH +
-                    '(\\w|\\_\\-)+)*)' +
+                    '(?<path>[^\\' +
+                    Bracket.CLOSE +
+                    ']*)' +
                     '\\' +
                     Bracket.CLOSE,
                 'gm',
@@ -481,13 +479,15 @@ class Template {
                 '(?<operator>[\\' +
                 Operator.NOT +
                 '])?' +
-                '(?<placeholder>(?<name>\\' +
-                Operator.PARTIAL +
-                '?\\w+(?:\\' +
-                Glue.PATH +
-                '\\w+)*)(?:\\' +
+                '(?<placeholder>(?<name>[^\\' +
                 Glue.PARAM +
-                '[\\w\\d]+)?)' +
+                '\\' +
+                Bracket.CLOSE +
+                ']*)(?:\\' +
+                Glue.PARAM +
+                '[^\\' +
+                Bracket.CLOSE +
+                ']+)?)' +
                 '\\' +
                 Bracket.CLOSE +
                 '(?<content>(.|\n)*?)\\k<prefix>\\' +
