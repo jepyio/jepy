@@ -48,38 +48,30 @@ class Template {
             this.#build();
         }
         let content = this.#content;
-        /**
-         * @param {String} prefix
-         * @param {function} callback
-         */
-        const replaceTagsByPrefix = (prefix, callback) => {
-            const tagPattern = new RegExp(
-                '(?<indent>[ \\t]*)' +
-                    '\\' +
-                    prefix +
-                    '\\' +
-                    Bracket.OPEN +
-                    '(?<path>[^\\' +
-                    Bracket.CLOSE +
-                    ']*)' +
-                    '\\' +
-                    Bracket.CLOSE,
-                'gm',
+        const escapedPrefixes = Object.values(Prefix).map((prefix) => '\\' + prefix);
+        const tagPattern = new RegExp(
+            '(?<indent>[ \\t]*)(?<placeholder>(?<prefix>[' +
+                escapedPrefixes.join('') +
+                '])\\' +
+                Bracket.OPEN +
+                '(?<path>[^\\' +
+                Bracket.CLOSE +
+                ']*)\\' +
+                Bracket.CLOSE +
+                ')',
+            'm',
+        );
+        let tag;
+        while ((tag = tagPattern.exec(content))) {
+            let param = this.#paramFromPath(tag.groups.path, params);
+            if (tag.groups.prefix === Prefix.ESCAPED && typeof param === 'string') {
+                param = this.#escape(param);
+            }
+            content = content.replaceAll(
+                tag.groups.placeholder,
+                this.#indentParam(param, tag.groups.indent),
             );
-            const tags = content.matchAll(tagPattern);
-            for (const tag of tags) {
-                const param = callback(tag.groups.path);
-                content = content.replaceAll(tag[0], this.#indentParam(param, tag.groups.indent));
-            }
-        };
-        replaceTagsByPrefix(Prefix.RAW, (path) => this.#paramFromPath(path, params));
-        replaceTagsByPrefix(Prefix.ESCAPED, (path) => {
-            const param = this.#paramFromPath(path, params);
-            if (typeof param === 'string') {
-                return this.#escape(param);
-            }
-            return param;
-        });
+        }
         return content;
     }
 
@@ -89,13 +81,10 @@ class Template {
      * @return {String}
      */
     #indentParam(param, indent) {
-        if (!indent) {
-            return param;
+        if (indent && typeof param === 'string' && param.includes('\n')) {
+            return param.replace(new RegExp('\\n', 'g'), '\n' + indent);
         }
-        if (typeof param === 'string' && param.includes('\n')) {
-            return indent + param.replace(new RegExp('\\n', 'g'), '\n' + indent);
-        }
-        return indent + param;
+        return param;
     }
 
     /**
@@ -171,13 +160,12 @@ class Template {
                 '\\/\\k<name>' +
                 '\\' +
                 Bracket.CLOSE,
-            'gm',
+            'm',
         );
         let counter = 0;
-        let matches = [];
+        let block = [];
         let blockPartials = {};
-        while ((matches = Array.from(this.#content.matchAll(blockPattern))).length > 0) {
-            const block = matches[0];
+        while ((block = blockPattern.exec(this.#content))) {
             const blockId = 'block_' + counter;
             counter++;
             const blockPlaceholder =
