@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   adding an option for validation partial to the Cached blocks in jepy.Template
 
+## [2.3.4] - 2025-07-03
+
+### Changed
+
+-   optimised regex pattern generation
+-   improved Conditional block logic
+
 ## [2.3.3] - 2025-07-03
 
 ### Changed

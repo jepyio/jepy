@@ -348,10 +348,6 @@ var jepy = (function () {
          * @var {Object}
          */
         #partials = {};
-        /**
-         * @var {Boolean}
-         */
-        #initialised = false;
 
         /**
          * @param {String} content
@@ -360,6 +356,7 @@ var jepy = (function () {
         constructor(content, partials = {}) {
             this.#content = content;
             this.#partials = partials;
+            this.#build();
         }
 
         /**
@@ -368,17 +365,10 @@ var jepy = (function () {
          * @return {String}
          */
         render(params = {}) {
-            if (!this.#content) {
-                return '';
-            }
-            if (!this.#initialised) {
-                this.#build();
-            }
             let content = this.#content;
-            const escapedPrefixes = Object.values(Prefix).map((prefix) => '\\' + prefix);
             const tagPattern = new RegExp(
-                '(?<indent>[ \\t]*)(?<placeholder>(?<prefix>[' +
-                    escapedPrefixes.join('') +
+                '(?<indent>[ \\t]*)(?<placeholder>(?<prefix>[\\' +
+                    Object.values(Prefix).join('\\') +
                     '])\\' +
                     Bracket.OPEN +
                     '(?<path>[^\\' +
@@ -459,12 +449,9 @@ var jepy = (function () {
         }
 
         #build() {
-            const escapedBlockPrefixes = Object.values(BlockPrefix).map(
-                (blockPrefix) => '\\' + blockPrefix,
-            );
             const blockPattern = new RegExp(
-                '(?<prefix>[' +
-                    escapedBlockPrefixes.join('') +
+                '(?<prefix>[\\' +
+                    Object.values(BlockPrefix).join('\\') +
                     '])' +
                     '\\' +
                     Bracket.OPEN +
@@ -501,7 +488,6 @@ var jepy = (function () {
                 blockPartials[blockId] = this.#blockCallback(block);
             }
             this.#partials = Object.assign(this.#partials, blockPartials);
-            this.#initialised = true;
         }
 
         /**
@@ -516,7 +502,7 @@ var jepy = (function () {
             case BlockPrefix.CONDITIONAL:
                 return (params) => {
                     let contentOnTrue = block.groups.content;
-                    let contentOnFalse = '';
+                    let blockOnFalse = new Simple('');
                     const expectsFalse = block.groups.operator === Operator.NOT;
                     const elseTag =
                             BlockPrefix.CONDITIONAL +
@@ -528,7 +514,7 @@ var jepy = (function () {
                     if (hasElseTag) {
                         const contentParts = contentOnTrue.split(elseTag);
                         contentOnTrue = contentParts[0];
-                        contentOnFalse = contentParts[1];
+                        blockOnFalse = new Template(contentParts[1], partials);
                     }
                     return new Conditional(
                         () => {
@@ -542,7 +528,7 @@ var jepy = (function () {
                             return isFulfilled;
                         },
                         new Template(contentOnTrue, partials),
-                        new Template(contentOnFalse, partials),
+                        blockOnFalse,
                     );
                 };
             case BlockPrefix.REPEATING:

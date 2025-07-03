@@ -62,7 +62,7 @@ Latest major version:
 Specific version (recommended to avoid breaking changes):
 
 ```
-<script src="https://cdn.jsdelivr.net/npm/jepy@2.3.3/dist/jepy.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jepy@2.3.4/dist/jepy.min.js"></script>
 ```
 
 ### npm

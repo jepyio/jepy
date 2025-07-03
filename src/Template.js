@@ -3,6 +3,7 @@ import {Cached} from './Block/Cached.js';
 import {Conditional} from './Block/Conditional.js';
 import {Repeating} from './Block/Repeating.js';
 import {Indented, IndentType} from './Block/Indented.js';
+import {Simple} from './Block/Simple.js';
 import {Glue} from './Template/Glue.js';
 import {Prefix, BlockPrefix} from './Template/Prefix.js';
 import {Bracket} from './Template/Bracket.js';
@@ -21,10 +22,6 @@ class Template {
      * @var {Object}
      */
     #partials = {};
-    /**
-     * @var {Boolean}
-     */
-    #initialised = false;
 
     /**
      * @param {String} content
@@ -33,6 +30,7 @@ class Template {
     constructor(content, partials = {}) {
         this.#content = content;
         this.#partials = partials;
+        this.#build();
     }
 
     /**
@@ -41,17 +39,10 @@ class Template {
      * @return {String}
      */
     render(params = {}) {
-        if (!this.#content) {
-            return '';
-        }
-        if (!this.#initialised) {
-            this.#build();
-        }
         let content = this.#content;
-        const escapedPrefixes = Object.values(Prefix).map((prefix) => '\\' + prefix);
         const tagPattern = new RegExp(
-            '(?<indent>[ \\t]*)(?<placeholder>(?<prefix>[' +
-                escapedPrefixes.join('') +
+            '(?<indent>[ \\t]*)(?<placeholder>(?<prefix>[\\' +
+                Object.values(Prefix).join('\\') +
                 '])\\' +
                 Bracket.OPEN +
                 '(?<path>[^\\' +
@@ -132,12 +123,9 @@ class Template {
     }
 
     #build() {
-        const escapedBlockPrefixes = Object.values(BlockPrefix).map(
-            (blockPrefix) => '\\' + blockPrefix,
-        );
         const blockPattern = new RegExp(
-            '(?<prefix>[' +
-                escapedBlockPrefixes.join('') +
+            '(?<prefix>[\\' +
+                Object.values(BlockPrefix).join('\\') +
                 '])' +
                 '\\' +
                 Bracket.OPEN +
@@ -174,7 +162,6 @@ class Template {
             blockPartials[blockId] = this.#blockCallback(block);
         }
         this.#partials = Object.assign(this.#partials, blockPartials);
-        this.#initialised = true;
     }
 
     /**
@@ -189,7 +176,7 @@ class Template {
         case BlockPrefix.CONDITIONAL:
             return (params) => {
                 let contentOnTrue = block.groups.content;
-                let contentOnFalse = '';
+                let blockOnFalse = new Simple('');
                 const expectsFalse = block.groups.operator === Operator.NOT;
                 const elseTag =
                         BlockPrefix.CONDITIONAL +
@@ -201,7 +188,7 @@ class Template {
                 if (hasElseTag) {
                     const contentParts = contentOnTrue.split(elseTag);
                     contentOnTrue = contentParts[0];
-                    contentOnFalse = contentParts[1];
+                    blockOnFalse = new Template(contentParts[1], partials);
                 }
                 return new Conditional(
                     () => {
@@ -215,7 +202,7 @@ class Template {
                         return isFulfilled;
                     },
                     new Template(contentOnTrue, partials),
-                    new Template(contentOnFalse, partials),
+                    blockOnFalse,
                 );
             };
         case BlockPrefix.REPEATING:
