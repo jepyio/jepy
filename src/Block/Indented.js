@@ -39,10 +39,7 @@ class Indented extends Block {
     render(params) {
         const indent = String().padStart(this.#indentLevel, this.#indentType);
         const content = this.#block.render(params);
-        if (content.includes('\n')) {
-            return indent + content.replace(new RegExp('\\n', 'g'), '\n' + indent);
-        }
-        return indent + content;
+        return content.replace(new RegExp('^', 'gm'), indent);
     }
 }
 

@@ -44,10 +44,11 @@ let linesToIndent = [];
 for (let i = 0; i < 500; i++) {
     linesToIndent.push('Lorem ipsum dolor sit amet');
 }
+linesToIndent = linesToIndent.join('\n');
 const indentedBlock = new jepy.Template('_{indentedBlock:100}%{linesToIndent}_{/indentedBlock}');
 bench('indented block', () =>
     indentedBlock.render({
-        linesToIndent: linesToIndent.join('\n'),
+        linesToIndent,
     }),
 );
 
