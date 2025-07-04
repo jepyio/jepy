@@ -55,27 +55,17 @@ class Template {
         let tag;
         while ((tag = tagPattern.exec(content))) {
             let param = this.#paramFromPath(tag.groups.path, params);
-            if (tag.groups.prefix === Prefix.ESCAPED && typeof param === 'string') {
-                param = this.#escape(param);
+            if (typeof param === 'string') {
+                if (tag.groups.prefix === Prefix.ESCAPED) {
+                    param = this.#escape(param);
+                }
+                if (tag.groups.indent && param.includes('\n')) {
+                    param = param.replace(new RegExp('\\n', 'g'), '\n' + tag.groups.indent);
+                }
             }
-            content = content.replaceAll(
-                tag.groups.placeholder,
-                this.#indentParam(param, tag.groups.indent),
-            );
+            content = content.replaceAll(tag.groups.placeholder, param);
         }
         return content;
-    }
-
-    /**
-     * @param {String} param
-     * @param {String} indent
-     * @return {String}
-     */
-    #indentParam(param, indent) {
-        if (indent && typeof param === 'string' && param.includes('\n')) {
-            return param.replace(new RegExp('\\n', 'g'), '\n' + indent);
-        }
-        return param;
     }
 
     /**
