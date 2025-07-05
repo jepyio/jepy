@@ -226,6 +226,8 @@ class Cached extends Block {
     #validationCallback;
     /** @type {String} */
     #cachedValue = null;
+    /** @type {Object} */
+    #cachedParams = {};
 
     /**
      * @param {Block} blockToCache
@@ -243,10 +245,12 @@ class Cached extends Block {
      * @return {String}
      */
     render(params) {
-        const isValid = this.#cachedValue !== null && this.#validationCallback(params, this);
+        const isValid =
+            this.#cachedValue !== null && this.#validationCallback(params, this.#cachedParams);
         if (!isValid) {
             this.#cachedValue = this.#blockToCache.render(params);
         }
+        this.#cachedParams = params;
         return this.#cachedValue;
     }
 }
@@ -543,9 +547,22 @@ class Template {
             return () => {
                 const parts = placeholder.split(Glue.PARAM);
                 const cacheName = 'cached_' + parts.at(0);
+                const validationCallback = placeholder.includes(Glue.PARAM)
+                    ? (params, cachedParams) => {
+                        const path = parts.at(1);
+                        if (path.startsWith(Operator.PARTIAL)) {
+                            return paramFromPath(path.slice(1), this.#partials)(
+                                params,
+                                cachedParams,
+                            );
+                        }
+                        return paramFromPath(path, params);
+                    }
+                    : () => true;
                 if (!Object.hasOwn(this.#partials, cacheName)) {
                     this.#partials[cacheName] = new Cached(
                         new Template(block.groups.content, partials),
+                        validationCallback,
                     );
                 }
                 return this.#partials[cacheName];

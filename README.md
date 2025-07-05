@@ -51,19 +51,7 @@ Build your own, use the "dist" folder's prebuilt files or use one of the followi
 
 ### CDN
 
-You may add jepy to your site using CDN by including either of the following code on your site.
-
-Latest major version:
-
-```
-<script src="https://cdn.jsdelivr.net/gh/jepyio/jepy/dist/jepy.min.js"></script>
-```
-
-Specific version (recommended to avoid breaking changes):
-
-```
-<script src="https://cdn.jsdelivr.net/npm/jepy@2.3.4/dist/jepy.min.js"></script>
-```
+You may add jepy to your site using [jsdelivr](https://www.jsdelivr.com/package/npm/jepy) [![](https://data.jsdelivr.com/v1/package/npm/jepy/badge)](https://www.jsdelivr.com/package/npm/jepy)
 
 ### npm
 
@@ -438,7 +426,7 @@ compositeBlock.render(templateParams);
 -   [x] Add optional parser to generate and cache blocks based on a simple template format
 -   [x] Add special parameters like "loop.first" and "loop.last" that could be used inside a Repeating block in jepy.Template
 -   [x] Add the "else" tag to Conditional blocks in jepy.Template to make it more readable and lean
--   [ ] Add an option for validation partial to the Cached blocks in jepy.Template
+-   [x] Add an option for validation partial to the Cached blocks in jepy.Template
 
 See the [open issues](https://github.com/jepyio/jepy/issues) for a full list of proposed features (and known issues).
 

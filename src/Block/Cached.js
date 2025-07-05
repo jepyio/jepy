@@ -14,6 +14,8 @@ class Cached extends Block {
     #validationCallback;
     /** @type {String} */
     #cachedValue = null;
+    /** @type {Object} */
+    #cachedParams = {};
 
     /**
      * @param {Block} blockToCache
@@ -31,10 +33,12 @@ class Cached extends Block {
      * @return {String}
      */
     render(params) {
-        const isValid = this.#cachedValue !== null && this.#validationCallback(params, this);
+        const isValid =
+            this.#cachedValue !== null && this.#validationCallback(params, this.#cachedParams);
         if (!isValid) {
             this.#cachedValue = this.#blockToCache.render(params);
         }
+        this.#cachedParams = params;
         return this.#cachedValue;
     }
 }

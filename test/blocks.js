@@ -267,6 +267,41 @@ describe('test template block', function () {
         );
         assert.equal(block.render(), 'cached block cached block ');
     });
+    it('cached block with validation', function () {
+        const block = new jepy.Template(
+            '#{items}${name} ={cachedBlock:@isSameGroup}[${group.name}]={/cachedBlock}?{!loop.last}, ?{/loop.last}#{/items}',
+            {
+                isSameGroup: (params, cachedParams) => params.group.id === cachedParams.group.id,
+            },
+        );
+        assert.equal(
+            block.render({
+                items: [
+                    {
+                        name: 'item1',
+                        group: {
+                            id: 1,
+                            name: 'group1',
+                        },
+                    },
+                    {
+                        name: 'item2',
+                        group: {
+                            id: 1,
+                        },
+                    },
+                    {
+                        name: 'item3',
+                        group: {
+                            id: 2,
+                            name: 'group2',
+                        },
+                    },
+                ],
+            }),
+            'item1 [group1], item2 [group1], item3 [group2]',
+        );
+    });
     it('indent multi line params', function () {
         const block = new jepy.Template(
             `<script type="importmap">
@@ -469,10 +504,10 @@ describe('test cached block', function () {
                 new jepy.Simple(' are returned'),
             ),
         ]);
-        const cachedBlock = new jepy.Cached(compositeBlock, (params, block) => {
-            const isValid = block.name === params.name;
+        const cachedBlock = new jepy.Cached(compositeBlock, (params, cachedParams) => {
+            const isValid = cachedParams.name === params.name;
             if (!isValid) {
-                block.name = params.name;
+                cachedParams.name = params.name;
             }
             return isValid;
         });
