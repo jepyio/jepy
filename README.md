@@ -2,7 +2,7 @@
 
 <div align="center">
   <a href="https://github.com/jepyio/jepy">
-    <img src="images/logo.svg" alt="Logo" height="80">
+    <img src="images/logo.svg" alt="Logo" style="height: 80px">
   </a>
 
   <p align="center">
@@ -28,17 +28,21 @@
 
 ## About The Project
 
-There are several amazing JS template engines out there, but most of them require multiple dependencies, must be pre-built and hard to expand if you need something specific. I wanted something tiny, reusable, and capable of rendering in real time with good performance. jepy solve all of these issues while keeping it size to the minimum
+jepy is a tiny, flexible, easy-to-use template engine that does not require extra dependencies or precompilation. It features a basic syntax that supports placeholders and block statements, which should allow you to design complicated, reusable templates.
 
-Here is what you get:
+### Here is what you get:
 
 -   It is ~4KB
--   It doesn't require pre-building and doesn't have any external dependencies
--   This will provide you with powerful tools to create even the most complicated templates while making them reusable and expandable
+-   It doesn't require pre-building to use the templates and has no external dependencies
+-   It supports parameter paths (for example "first-level.second-level.third-level..."), allowing you to refer to any value within your parameter object
+-   It is indent-aware. Multi-line parameters will be indented to your placeholders, and Indented Blocks will be applied to multi-line block content
+-   You can use block statements and partials to construct as complex templates as you like. For example, you may stitch together many templates with partials, add callback functions against the parameters, and create very complex conditional block expressions
+-   You may either use a Template, directly use Block classes, or a combination of these
+-   You can use the ```loop.index```, ```loop.first```, ```loop.last```, ```loop.number```, and ```loop.size``` parameters within your Repeating block, which can be quite handy
 
-The things you don't get:
+### The things you don't get:
 
--   It definitely does not work with IE11 (it is based on [classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)). Fortunately, it is mostly extinct
+-   It definitely does not work with IE11 (it is based on [classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)) or any other ancient browser versions. Fortunately, these are mostly extinct
 -   It might not work with really old Edge Legacy versions. These shouldn't be out in the wild anymore with the automatic updates, but possible if you didn't have any update from 2016
 
 I do not consider this a disadvantage, but you may. Since Microsoft has already stopped supporting [IE11](https://learn.microsoft.com/en-us/lifecycle/products/internet-explorer-11) and the non-Chrome based [Edge Legacy](https://learn.microsoft.com/en-us/lifecycle/products/microsoft-edge-legacy), I would prefer not to bother supporting these.
@@ -51,7 +55,7 @@ Build your own, use the "dist" folder's prebuilt files or use one of the followi
 
 ### CDN
 
-You may add jepy to your site using [jsdelivr](https://www.jsdelivr.com/package/npm/jepy) [![](https://data.jsdelivr.com/v1/package/npm/jepy/badge)](https://www.jsdelivr.com/package/npm/jepy)
+You may add jepy to your site using [![](https://data.jsdelivr.com/v1/package/npm/jepy/badge)](https://www.jsdelivr.com/package/npm/jepy)
 
 ### npm
 
@@ -427,6 +431,7 @@ compositeBlock.render(templateParams);
 -   [x] Add special parameters like "loop.first" and "loop.last" that could be used inside a Repeating block in jepy.Template
 -   [x] Add the "else" tag to Conditional blocks in jepy.Template to make it more readable and lean
 -   [x] Add an option for validation partial to the Cached blocks in jepy.Template
+-   [ ] Add parameter and partial filters to jepy.Template
 
 See the [open issues](https://github.com/jepyio/jepy/issues) for a full list of proposed features (and known issues).
 
