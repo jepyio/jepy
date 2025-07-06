@@ -81,6 +81,7 @@ class Conditional extends Block {
 const Glue = {
     PATH: '.',
     PARAM: ':',
+    FILTER: '|',
 };
 
 /**
@@ -335,6 +336,40 @@ const Operator = {
 };
 
 /**
+ * @enum {String}
+ */
+const GenericFilter = {
+    STRINGIFY: 'stringify',
+};
+/**
+ * @enum {String}
+ */
+const StringFilter = {
+    UPPER: 'upper',
+    LOWER: 'lower',
+    CAPITALIZE: 'capitalize',
+    TRIM: 'trim',
+};
+/**
+ * @enum {String}
+ */
+const NumberFilter = {
+    ABS: 'abs',
+    ROUND: 'round',
+    FLOOR: 'floor',
+    CEIL: 'ceil',
+};
+/**
+ * @enum {String}
+ */
+const ArrayFilter = {
+    FIRST: 'first',
+    LAST: 'last',
+    MIN: 'min',
+    MAX: 'max',
+};
+
+/**
  * @implements {Block}
  */
 class Template {
@@ -371,7 +406,11 @@ class Template {
                 Bracket.OPEN +
                 '(?<path>[^\\' +
                 Bracket.CLOSE +
-                ']*)\\' +
+                '\\|]*)(\\' +
+                Glue.FILTER +
+                '(?<filter>[^\\' +
+                Bracket.CLOSE +
+                '\\|]+))?\\' +
                 Bracket.CLOSE +
                 ')',
             'm',
@@ -379,6 +418,9 @@ class Template {
         let tag;
         while ((tag = tagPattern.exec(content))) {
             let param = this.#paramFromPath(tag.groups.path, params);
+            if (tag.groups.filter) {
+                param = this.#applyFilter(tag.groups.filter, param);
+            }
             if (typeof param === 'string') {
                 if (tag.groups.prefix === Prefix.ESCAPED) {
                     param = this.#escape(param);
@@ -390,6 +432,44 @@ class Template {
             content = content.replaceAll(tag.groups.placeholder, param);
         }
         return content;
+    }
+
+    /**
+     * @param {Filter} filter
+     * @param {*} param
+     * @return {String}
+     */
+    #applyFilter(filter, param) {
+        switch (filter) {
+        case GenericFilter.STRINGIFY:
+            return JSON.stringify(param);
+        case StringFilter.LOWER:
+            return param.toLowerCase();
+        case StringFilter.UPPER:
+            return param.toUpperCase();
+        case StringFilter.CAPITALIZE:
+            return param.at(0).toUpperCase() + param.slice(1);
+        case StringFilter.TRIM:
+            return param.trim();
+        case NumberFilter.ABS:
+            return Math.abs(parseFloat(param));
+        case NumberFilter.ROUND:
+            return Math.round(parseFloat(param));
+        case NumberFilter.FLOOR:
+            return Math.floor(parseFloat(param));
+        case NumberFilter.CEIL:
+            return Math.ceil(parseFloat(param));
+        case ArrayFilter.FIRST:
+            return param.at(0);
+        case ArrayFilter.LAST:
+            return param.at(-1);
+        case ArrayFilter.MIN:
+            return Math.min(...param);
+        case ArrayFilter.MAX:
+            return Math.max(...param);
+        default:
+            throw new SyntaxError('unhandled filter "' + filter + '"');
+        }
     }
 
     /**

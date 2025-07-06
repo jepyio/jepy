@@ -32,13 +32,14 @@ jepy is a tiny, flexible, easy-to-use template engine that does not require extr
 
 ### Here is what you get:
 
--   It is ~4KB
+-   It is ~5KB
 -   It doesn't require pre-building to use the templates and has no external dependencies
 -   It supports parameter paths (for example "first-level.second-level.third-level..."), allowing you to refer to any value within your parameter object
 -   It is indent-aware. Multi-line parameters will be indented to your placeholders, and Indented Blocks will be applied to multi-line block content
 -   You can use block statements and partials to construct as complex templates as you like. For example, you may stitch together many templates with partials, add callback functions against the parameters, and create very complex conditional block expressions
 -   You may either use a Template, directly use Block classes, or a combination of these
--   You can use the ```loop.index```, ```loop.first```, ```loop.last```, ```loop.number```, and ```loop.size``` parameters within your Repeating block, which can be quite handy
+-   You can use the `loop.index`, `loop.first`, `loop.last`, `loop.number`, and `loop.size` parameters within your Repeating block, which can be quite handy
+-   It has useful filters that you can use with param and partial placeholders (see filters section)
 
 ### The things you don't get:
 
@@ -221,6 +222,35 @@ templateBlock.render({
 });
 // output: cached text cached text
 ```
+
+### jepy.Template filters
+
+These work with raw or escaped placeholders, using both parameters and partials.
+
+#### Generic filters
+
+-   `${name|stringify}` is used to JSON.stingify your placeholder value
+
+#### String filters
+
+-   `${name|lower}` is used to lower case your placeholder value
+-   `${name|upper}` is used to upper case your placeholder value
+-   `${name|capitalize}` is used to capitalise your placeholder value
+-   `${name|trim}` is used to trim your placeholder value
+
+#### Number filters
+
+-   `${name|abs}` is used get the absolute value of a placeholder value
+-   `${name|round}` is used get the rounded value of a placeholder value
+-   `${name|floor}` is used get the rounded down value of a placeholder value
+-   `${name|ceil}` is used get the rounded up value of a placeholder value
+
+#### Array filters
+
+-   `${name|first}` is used get the first element of an array placeholder value
+-   `${name|last}` is used get the last element of an array placeholder value
+-   `${name|min}` is used get the min element of an array placeholder value
+-   `${name|max}` is used get the max element of an array placeholder value
 
 ### jepy.Simple
 
@@ -431,7 +461,8 @@ compositeBlock.render(templateParams);
 -   [x] Add special parameters like "loop.first" and "loop.last" that could be used inside a Repeating block in jepy.Template
 -   [x] Add the "else" tag to Conditional blocks in jepy.Template to make it more readable and lean
 -   [x] Add an option for validation partial to the Cached blocks in jepy.Template
--   [ ] Add parameter and partial filters to jepy.Template
+-   [x] Add parameter and partial filters to jepy.Template
+-   [ ] Replace readme description with detailed documentation page that has a sandbox and some examples
 
 See the [open issues](https://github.com/jepyio/jepy/issues) for a full list of proposed features (and known issues).
 
