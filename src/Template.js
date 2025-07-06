@@ -8,6 +8,7 @@ import {Glue} from './Template/Glue.js';
 import {Prefix, BlockPrefix} from './Template/Prefix.js';
 import {Bracket} from './Template/Bracket.js';
 import {Operator} from './Template/Operator.js';
+import {GenericFilter, StringFilter, NumberFilter, ArrayFilter} from './Template/Filter.js';
 import {paramFromPath} from './params.js';
 
 /**
@@ -47,7 +48,11 @@ class Template {
                 Bracket.OPEN +
                 '(?<path>[^\\' +
                 Bracket.CLOSE +
-                ']*)\\' +
+                '\\|]*)(\\' +
+                Glue.FILTER +
+                '(?<filter>[^\\' +
+                Bracket.CLOSE +
+                '\\|]+))?\\' +
                 Bracket.CLOSE +
                 ')',
             'm',
@@ -55,6 +60,9 @@ class Template {
         let tag;
         while ((tag = tagPattern.exec(content))) {
             let param = this.#paramFromPath(tag.groups.path, params);
+            if (tag.groups.filter) {
+                param = this.#applyFilter(tag.groups.filter, param);
+            }
             if (typeof param === 'string') {
                 if (tag.groups.prefix === Prefix.ESCAPED) {
                     param = this.#escape(param);
@@ -66,6 +74,44 @@ class Template {
             content = content.replaceAll(tag.groups.placeholder, param);
         }
         return content;
+    }
+
+    /**
+     * @param {Filter} filter
+     * @param {*} param
+     * @return {String}
+     */
+    #applyFilter(filter, param) {
+        switch (filter) {
+        case GenericFilter.STRINGIFY:
+            return JSON.stringify(param);
+        case StringFilter.LOWER:
+            return param.toLowerCase();
+        case StringFilter.UPPER:
+            return param.toUpperCase();
+        case StringFilter.CAPITALIZE:
+            return param.at(0).toUpperCase() + param.slice(1);
+        case StringFilter.TRIM:
+            return param.trim();
+        case NumberFilter.ABS:
+            return Math.abs(parseFloat(param));
+        case NumberFilter.ROUND:
+            return Math.round(parseFloat(param));
+        case NumberFilter.FLOOR:
+            return Math.floor(parseFloat(param));
+        case NumberFilter.CEIL:
+            return Math.ceil(parseFloat(param));
+        case ArrayFilter.FIRST:
+            return param.at(0);
+        case ArrayFilter.LAST:
+            return param.at(-1);
+        case ArrayFilter.MIN:
+            return Math.min(...param);
+        case ArrayFilter.MAX:
+            return Math.max(...param);
+        default:
+            throw new SyntaxError('unhandled filter "' + filter + '"');
+        }
     }
 
     /**

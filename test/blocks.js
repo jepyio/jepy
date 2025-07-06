@@ -17,6 +17,123 @@ describe('test template block', function () {
             '<div><div>element</div></div>',
         );
     });
+    it('placeholder must be replaced with upper case string', function () {
+        const block = new jepy.Template('%{text|upper}');
+        assert.equal(
+            block.render({
+                text: 'test',
+            }),
+            'TEST',
+        );
+    });
+    it('placeholder must be replaced with lower case string', function () {
+        const block = new jepy.Template('%{text|lower}');
+        assert.equal(
+            block.render({
+                text: 'TEST',
+            }),
+            'test',
+        );
+    });
+    it('placeholder must be replaced with the capitalised string', function () {
+        const block = new jepy.Template('%{text|capitalize}');
+        assert.equal(
+            block.render({
+                text: 'this is a test',
+            }),
+            'This is a test',
+        );
+    });
+    it('placeholder must be replaced with trimmed string', function () {
+        const block = new jepy.Template('%{text|trim}');
+        assert.equal(
+            block.render({
+                text: '   test   ',
+            }),
+            'test',
+        );
+    });
+    it('placeholder must be replaced with the first element of array', function () {
+        const block = new jepy.Template('%{items|first}');
+        assert.equal(
+            block.render({
+                items: ['first', 'second', 'third'],
+            }),
+            'first',
+        );
+    });
+    it('placeholder must be replaced with the last element of array', function () {
+        const block = new jepy.Template('%{items|last}');
+        assert.equal(
+            block.render({
+                items: ['first', 'second', 'third'],
+            }),
+            'third',
+        );
+    });
+    it('placeholder must be replaced with the min element of array', function () {
+        const block = new jepy.Template('%{items|min}');
+        assert.equal(
+            block.render({
+                items: [5, 1, 9, 3],
+            }),
+            '1',
+        );
+    });
+    it('placeholder must be replaced with the max element of array', function () {
+        const block = new jepy.Template('%{items|max}');
+        assert.equal(
+            block.render({
+                items: [5, 1, 9, 3],
+            }),
+            '9',
+        );
+    });
+    it('placeholder must be replaced with the json stringified array', function () {
+        const block = new jepy.Template('%{items|stringify}');
+        assert.equal(
+            block.render({
+                items: ['first', 'second', 'third'],
+            }),
+            '["first","second","third"]',
+        );
+    });
+    it('placeholder must be replaced with the absolute number', function () {
+        const block = new jepy.Template('%{number|abs}');
+        assert.equal(
+            block.render({
+                number: -1,
+            }),
+            '1',
+        );
+    });
+    it('placeholder must be replaced with the rounded number', function () {
+        const block = new jepy.Template('%{number|round}');
+        assert.equal(
+            block.render({
+                number: 1.09,
+            }),
+            '1',
+        );
+    });
+    it('placeholder must be replaced with the rounded up number', function () {
+        const block = new jepy.Template('%{number|ceil}');
+        assert.equal(
+            block.render({
+                number: 1.09,
+            }),
+            '2',
+        );
+    });
+    it('placeholder must be replaced with the rounded down number', function () {
+        const block = new jepy.Template('%{number|floor}');
+        assert.equal(
+            block.render({
+                number: 1.79,
+            }),
+            '1',
+        );
+    });
     it('use multi level path for placeholder value', function () {
         const block = new jepy.Template('<div>%{first.second.third}</div>');
         assert.equal(

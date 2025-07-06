@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
--   add parameter and partial filters to jepy.Template
+-   replace the readme description with a full documentation page with a sandbox and some examples.
+
+## [2.5.0] - 2025-07-06
+
+-   add stringify, upper, lower, capitalize, trim, abs, round, floor, ceil, first, last, min and max parameter and partial filters to jepy.Template
 
 ## [2.4.1] - 2025-07-05
 
