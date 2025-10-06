@@ -17,6 +17,15 @@ describe('test template block', function () {
             '<div><div>element</div></div>',
         );
     });
+    it('multiple filters', function () {
+        const block = new jepy.Template('<div>%{text|upper|e}</div>');
+        assert.equal(
+            block.render({
+                text: '<img src="test.jpg">',
+            }),
+            '<div>&#60;IMG SRC=&#34;TEST.JPG&#34;&#62;</div>',
+        );
+    });
     it('placeholder must be replaced with upper case string', function () {
         const block = new jepy.Template('%{text|upper}');
         assert.equal(
@@ -148,7 +157,7 @@ describe('test template block', function () {
         );
     });
     it('escape html in text', function () {
-        const block = new jepy.Template('<div>${text}</div>');
+        const block = new jepy.Template('<div>%{text|e}</div>');
         assert.equal(
             block.render({
                 text: '<img src="test.jpg">',
@@ -157,7 +166,7 @@ describe('test template block', function () {
         );
     });
     it('escape surrogate pair rocket emoji', function () {
-        const block = new jepy.Template('<div>${text}</div>');
+        const block = new jepy.Template('<div>%{text|e}</div>');
         assert.equal(
             block.render({
                 text: '🚀',
@@ -172,7 +181,7 @@ describe('test template block', function () {
         assert.equal(block.render(), '<div><div>element</div></div>');
     });
     it('partial must be replaced with unescaped function return', function () {
-        const block = new jepy.Template('<div>${@partial}</div>', {
+        const block = new jepy.Template('<div>%{@partial|e}</div>', {
             partial: (params) => 'Hello ' + params.name,
         });
         assert.equal(
@@ -183,7 +192,7 @@ describe('test template block', function () {
         );
     });
     it('partial must be replaced with block content', function () {
-        const block = new jepy.Template('<div>${@partial}</div>', {
+        const block = new jepy.Template('<div>%{@partial|e}</div>', {
             partial: new jepy.Conditional(
                 (params) => params.isVisible,
                 new jepy.Simple('Am I visible?'),
@@ -198,7 +207,7 @@ describe('test template block', function () {
     });
     it('conditional block only rendering when value is truly', function () {
         const block = new jepy.Template(
-            '?{firstName}${firstName}?{/firstName}?{lastName} ${lastName}?{/lastName}',
+            '?{firstName}%{firstName}?{/firstName}?{lastName} %{lastName|e}?{/lastName}',
         );
         assert.equal(
             block.render({
@@ -210,7 +219,7 @@ describe('test template block', function () {
     });
     it('conditional block with partial and false return', function () {
         const block = new jepy.Template(
-            '?{@hasFirstAndLastName}${firstName} ${lastName}?{/@hasFirstAndLastName}',
+            '?{@hasFirstAndLastName}%{firstName|e} %{lastName|e}?{/@hasFirstAndLastName}',
             {
                 hasFirstAndLastName: (params) => params.firstName && params.lastName,
             },
@@ -224,7 +233,7 @@ describe('test template block', function () {
     });
     it('conditional block with partial and true return', function () {
         const block = new jepy.Template(
-            '?{@hasFirstAndLastName}${firstName} ${lastName}?{/@hasFirstAndLastName}',
+            '?{@hasFirstAndLastName}%{firstName|e} %{lastName|e}?{/@hasFirstAndLastName}',
             {
                 hasFirstAndLastName: (params) => params.firstName && params.lastName,
             },
@@ -261,7 +270,7 @@ describe('test template block', function () {
     });
     it('conditional block with else tag with truly', function () {
         const block = new jepy.Template(
-            'Hello ?{firstName}${firstName}?{!firstName}guest?{/firstName}',
+            'Hello ?{firstName}%{firstName|e}?{!firstName}guest?{/firstName}',
         );
         assert.equal(
             block.render({
@@ -272,7 +281,7 @@ describe('test template block', function () {
     });
     it('conditional block with else tag with falsy', function () {
         const block = new jepy.Template(
-            'Hello ?{firstName}${firstName}?{!firstName}guest?{/firstName}',
+            'Hello ?{firstName}%{firstName|e}?{!firstName}guest?{/firstName}',
         );
         assert.equal(
             block.render({
@@ -283,7 +292,7 @@ describe('test template block', function () {
     });
     it('conditional block with else tag with not operator and truly', function () {
         const block = new jepy.Template(
-            'Hello ?{!firstName}guest?{firstName}${firstName}?{/firstName}',
+            'Hello ?{!firstName}guest?{firstName}%{firstName|e}?{/firstName}',
         );
         assert.equal(
             block.render({
@@ -294,7 +303,7 @@ describe('test template block', function () {
     });
     it('conditional block with else tag with not operator and falsy', function () {
         const block = new jepy.Template(
-            'Hello ?{!firstName}guest?{firstName}${firstName}?{/firstName}',
+            'Hello ?{!firstName}guest?{firstName}%{firstName|e}?{/firstName}',
         );
         assert.equal(
             block.render({
@@ -316,7 +325,7 @@ describe('test template block', function () {
         assert.equal(block.render(), '\t\ttab indented text');
     });
     it('repeating block without alias', function () {
-        const block = new jepy.Template('#{items}${name} #{/items}');
+        const block = new jepy.Template('#{items}%{name|e} #{/items}');
         assert.equal(
             block.render({
                 items: [
@@ -333,8 +342,8 @@ describe('test template block', function () {
     });
     it('loop variables', function () {
         const block = new jepy.Template(
-            '#{items}${loop.number}/${loop.size} ${name}' +
-                ' > #{subItems} ${loop.number}/${loop.size} ${name}#{/subItems}?{!loop.last}\n?{/loop.last}#{/items}',
+            '#{items}%{loop.number|e}/%{loop.size|e} %{name|e}' +
+                ' > #{subItems} %{loop.number|e}/%{loop.size|e} %{name|e}#{/subItems}?{!loop.last}\n?{/loop.last}#{/items}',
         );
         assert.equal(
             block.render({
@@ -370,7 +379,7 @@ describe('test template block', function () {
         );
     });
     it('repeating block with alias', function () {
-        const block = new jepy.Template('#{items:item}${item} #{/items}');
+        const block = new jepy.Template('#{items:item}%{item|e} #{/items}');
         assert.equal(
             block.render({
                 items: ['item1', 'item2'],
@@ -386,7 +395,7 @@ describe('test template block', function () {
     });
     it('cached block with validation', function () {
         const block = new jepy.Template(
-            '#{items}${name} ={cachedBlock:@isSameGroup}[${group.name}]={/cachedBlock}?{!loop.last}, ?{/loop.last}#{/items}',
+            '#{items}%{name|e} ={cachedBlock:@isSameGroup}[%{group.name|e}]={/cachedBlock}?{!loop.last}, ?{/loop.last}#{/items}',
             {
                 isSameGroup: (params, cachedParams) => params.group.id === cachedParams.group.id,
             },
@@ -463,7 +472,7 @@ describe('test repeating block', function () {
     it('returns repeating text', function () {
         const block = new jepy.Repeating(
             'items',
-            new jepy.Template('<a href="${url}">${text}</a>'),
+            new jepy.Template('<a href="%{url|e}">%{text|e}</a>'),
         );
         assert.equal(
             block.render({
@@ -484,7 +493,7 @@ describe('test repeating block', function () {
     it('returns repeating text with callback', function () {
         const block = new jepy.Repeating(
             'items',
-            new jepy.Template('${prefix} line #${line.number}</br>'),
+            new jepy.Template('%{prefix|e} line #%{line.number|e}</br>'),
             (item, params) => {
                 params.line = {
                     number: item,
@@ -510,7 +519,7 @@ describe('test complex block chain', function () {
                 (params) => params.items.length > 0,
                 new jepy.Composite([
                     new jepy.Template(
-                        '<div>You have ${@numberOfItems} ${@itemText} in your basket</div><ul>',
+                        '<div>You have %{@numberOfItems|e} %{@itemText|e} in your basket</div><ul>',
                         {
                             numberOfItems: (params) => params.items.length,
                             itemText: (params) => singularOrPlural('item', params.items.length),
@@ -518,7 +527,7 @@ describe('test complex block chain', function () {
                     ),
                     new jepy.Repeating(
                         'items',
-                        new jepy.Template('<li><a href="${url}">%{@icon}${text}</a></li>', {
+                        new jepy.Template('<li><a href="%{url|e}">%{@icon}%{text|e}</a></li>', {
                             icon: (params) =>
                                 params.outOfStock ? '<span class="out-of-stock"></span>' : '',
                         }),
@@ -580,7 +589,7 @@ describe('test callback block', function () {
             const itemCount = params.items.length;
             const singularOrPlural = (noun, counter) => (counter > 1 ? noun + 's' : noun);
             const basketBlock = new jepy.Template(
-                '<div>You have ${itemCount} ${itemText} in your basket</div>',
+                '<div>You have %{itemCount|e} %{itemText|e} in your basket</div>',
             );
             return basketBlock.render({
                 itemCount: itemCount,
@@ -610,7 +619,7 @@ describe('test cached block', function () {
     it('should return the composite block value with validation', function () {
         const compositeBlock = new jepy.Composite([
             new jepy.Simple('merged '),
-            new jepy.Template('<div>${@partial}</div>', {
+            new jepy.Template('<div>%{@partial|e}</div>', {
                 partial: (params) => (params.name === undefined ? '' : 'Hello ' + params.name),
             }),
             new jepy.Callback((params) =>
