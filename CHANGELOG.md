@@ -9,7 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   replace the readme description with a full documentation page with a sandbox and some examples.
 
+## [3.0.0] - 2025-10-06
+
+### Changed
+
+-   add esc filter and short hand to escape parameter and partial values
+
+### Removed
+
+-   $ prefix that used to represent escaped values. this is now replace with the esc filter
+
 ## [2.5.0] - 2025-07-06
+
+### Changed
 
 -   add stringify, upper, lower, capitalize, trim, abs, round, floor, ceil, first, last, min and max parameter and partial filters to jepy.Template
 
@@ -105,7 +117,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 -   jepy.Placeholder changed into jepy.Template with block logic support and expanded capabilities
--   made the @ partial placeholder into an operator that could be used in other placeholder and block logic. for example it is now possible to have an raw %{@partialName} and escaped ${@partialName} partial placeholder
+-   made the @ partial placeholder into an operator that could be used in other placeholder and block logic. for example it is now possible to have an raw %{@partialName} and escaped %{@partialName} partial placeholder
 
 ## [1.3.4] - 2023-12-30
 

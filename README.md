@@ -72,9 +72,9 @@ You can create your templates with the following building blocks. If you want to
 
 ### jepy.Template
 
-The most powerful and adaptable building block available. This will fulfil most of your needs as a standalone logic and will cover what most template engines do. It could replace placeholders with an escaped or raw value, and add blocks or partials to insert a text, Block or execute a function on the parameters to render your placeholder value. This supports parameter paths so you can use the following format to point to a value "first-level.second-level.third-level...".
+The most powerful and adaptable building block available. This will fulfil most of your needs as a standalone logic and will cover what most template engines do. It could replace placeholders with a parameter value, and add blocks or partials to insert a text, Block or execute a function on the parameters to render your placeholder value. This supports parameter paths so you can use the following format to point to a value "first-level.second-level.third-level...".
 
-#### jepy.Template with raw value
+#### jepy.Template with parameter value
 
 This could be useful if you need to insert HTML into your template
 
@@ -86,30 +86,16 @@ templateBlock.render({
 // output: <div><img src="test.jpg"></div>
 ```
 
-#### jepy.Template with escaped value
-
-This will escape special characters in the param you are passing to this
-
-```javascript
-const templateBlock = new jepy.Template('<div>${values.text}</div>');
-templateBlock.render({
-    values: {
-        text: '<img src="test.jpg">',
-    },
-});
-// output: <div>&#60;img src=&#34;test.jpg&#34;&#62;</div>
-```
-
 #### jepy.Template with partials
 
 Partials can be used to add advanced fetures to your template. These could refer to a string, Block or a callback
 
 ```javascript
 const templateBlock = new jepy.Template(
-    '%{@rawPartialString}${@escapedPartialBlock}%{@rawPartialCallback}',
+    '%{@rawPartialString}%{@escapedPartialBlock|e}%{@rawPartialCallback}',
     {
         rawPartialString: '<img ',
-        escapedPartialBlock: new jepy.Template('src="${imageUrl}"'),
+        escapedPartialBlock: new jepy.Template('src="%{imageUrl}"'),
         rawPartialCallback: (params) => params.endChar,
     },
 );
@@ -126,7 +112,7 @@ This is your simple "if ... else ..." building block. It is useful to build a si
 
 ```javascript
 const templateBlock = new jepy.Template(
-    'Hello ?{firstName}${firstName}?{!firstName}guest?{/firstName}!',
+    'Hello ?{firstName}%{firstName}?{!firstName}guest?{/firstName}!',
 );
 templateBlock.render({
     firstName: 'Adam',
@@ -162,7 +148,7 @@ This is your "foreach ..." building block. You may use the loop.index, loop.firs
 
 ```javascript
 const templateBlock = new jepy.Template(
-    '#{items}#${loop.number} - ${name} ?{!inStock}[Not in stock]?{/inStock}?{!loop.last}, ?{/loop.last}#{/items}',
+    '#{items}#%{loop.number} - %{name} ?{!inStock}[Not in stock]?{/inStock}?{!loop.last}, ?{/loop.last}#{/items}',
 );
 templateBlock.render({
     items: [
@@ -184,7 +170,7 @@ templateBlock.render({
 This is your "foreach ... as ..." building block. It is useful when you have an array of items that you cannot refer by name
 
 ```javascript
-const templateBlock = new jepy.Template('#{items:item}${item},#{/items}');
+const templateBlock = new jepy.Template('#{items:item}%{item},#{/items}');
 templateBlock.render({
     items: ['apple', 'pen'],
 });
@@ -194,7 +180,7 @@ templateBlock.render({
 #### jepy.Template with Idented Block using spaces
 
 ```javascript
-const templateBlock = new jepy.Template('_{indentedBlock:1}${text}_{/indentedBlock}');
+const templateBlock = new jepy.Template('_{indentedBlock:1}%{text}_{/indentedBlock}');
 templateBlock.render({
     text: 'space indented text',
 });
@@ -204,7 +190,7 @@ templateBlock.render({
 #### jepy.Template with Idented Block using tabs
 
 ```javascript
-const templateBlock = new jepy.Template('>{indentedBlock:2}${text}>{/indentedBlock}');
+const templateBlock = new jepy.Template('>{indentedBlock:2}%{text}>{/indentedBlock}');
 templateBlock.render({
     text: 'tab indented text',
 });
@@ -215,7 +201,7 @@ templateBlock.render({
 
 ```javascript
 const templateBlock = new jepy.Template(
-    '={cachedBlock}${text} ={/cachedBlock}={cachedBlock}={/cachedBlock}',
+    '={cachedBlock}%{text} ={/cachedBlock}={cachedBlock}={/cachedBlock}',
 );
 templateBlock.render({
     text: 'cached text',
@@ -225,32 +211,33 @@ templateBlock.render({
 
 ### jepy.Template filters
 
-These work with raw or escaped placeholders, using both parameters and partials.
+These work with both parameters and partials.
 
 #### Generic filters
 
--   `${name|stringify}` is used to JSON.stingify your placeholder value
+-   `%{name|stringify}` is used to JSON.stingify your placeholder value
 
 #### String filters
 
--   `${name|lower}` is used to lower case your placeholder value
--   `${name|upper}` is used to upper case your placeholder value
--   `${name|capitalize}` is used to capitalise your placeholder value
--   `${name|trim}` is used to trim your placeholder value
+-   `%{name|lower}` is used to lower case your placeholder value
+-   `%{name|upper}` is used to upper case your placeholder value
+-   `%{name|capitalize}` is used to capitalise your placeholder value
+-   `%{name|trim}` is used to trim your placeholder value
+-   `%{name|esc}` or `%{name|e}` is used to escape your placeholder value
 
 #### Number filters
 
--   `${name|abs}` is used get the absolute value of a placeholder value
--   `${name|round}` is used get the rounded value of a placeholder value
--   `${name|floor}` is used get the rounded down value of a placeholder value
--   `${name|ceil}` is used get the rounded up value of a placeholder value
+-   `%{name|abs}` is used get the absolute value of a placeholder value
+-   `%{name|round}` is used get the rounded value of a placeholder value
+-   `%{name|floor}` is used get the rounded down value of a placeholder value
+-   `%{name|ceil}` is used get the rounded up value of a placeholder value
 
 #### Array filters
 
--   `${name|first}` is used get the first element of an array placeholder value
--   `${name|last}` is used get the last element of an array placeholder value
--   `${name|min}` is used get the min element of an array placeholder value
--   `${name|max}` is used get the max element of an array placeholder value
+-   `%{name|first}` is used get the first element of an array placeholder value
+-   `%{name|last}` is used get the last element of an array placeholder value
+-   `%{name|min}` is used get the min element of an array placeholder value
+-   `%{name|max}` is used get the max element of an array placeholder value
 
 ### jepy.Simple
 
@@ -270,7 +257,7 @@ This is your "if ... else ..." building block. It needs a function to check the 
 // without optional "else"
 const conditionalBlock = new jepy.Conditional(
     (params) => params.who !== undefined,
-    new jepy.Template('<div>Hello ${who}</div>'),
+    new jepy.Template('<div>Hello %{who}</div>'),
 );
 conditionalBlock.render();
 // output:
@@ -283,7 +270,7 @@ conditionalBlock.render({
 // with "else"
 const conditionalBlock = new jepy.Conditional(
     (params) => params.who !== undefined,
-    new jepy.Template('<div>Hello ${who}</div>'),
+    new jepy.Template('<div>Hello %{who}</div>'),
     new jepy.Simple("<div>Sorry, I don't have your name</div>"),
 );
 conditionalBlock.render();
@@ -301,7 +288,7 @@ This is your "foreach ..." building block. This needs a path (same format as the
 
 ```javascript
 // without parameter modifier function
-const repeatingBlock = new jepy.Repeating('items', new jepy.Template('<div>#${id} ${name}</div>'));
+const repeatingBlock = new jepy.Repeating('items', new jepy.Template('<div>#%{id} %{name}</div>'));
 repeatingBlock.render({
     items: [
         {
@@ -319,7 +306,7 @@ repeatingBlock.render({
 // with parameter modifier
 const repeatingBlock = new jepy.Repeating(
     'items',
-    new jepy.Template('<div>#${id} ${colour} ${name}</div>'),
+    new jepy.Template('<div>#%{id} %{colour} %{name}</div>'),
     (item, params) => {
         item.name = params.itemName;
         return item;
@@ -348,8 +335,8 @@ This is used to stich together multiple Blocks into one. You can use this to mak
 ```javascript
 const compositeBlock = new jepy.Composite([
     new jepy.Simple('<div>'),
-    new jepy.Template('<div>Hello ${who}</div>'),
-    new jepy.Repeating('items', new jepy.Template('<div>#${id} ${name}</div>')),
+    new jepy.Template('<div>Hello %{who}</div>'),
+    new jepy.Repeating('items', new jepy.Template('<div>#%{id} %{name}</div>')),
     new jepy.Simple('</div>'),
 ]);
 compositeBlock.render({
@@ -377,7 +364,7 @@ const callbackBlock = new jepy.Callback((params) => {
     const itemCount = params.items.length;
     const singularOrPlural = (noun, counter) => (counter > 1 ? noun + 's' : noun);
     const basketBlock = new jepy.Template(
-        '<div>You have ${itemCount} ${itemText} in your basket</div>',
+        '<div>You have %{itemCount} %{itemText} in your basket</div>',
     );
     return basketBlock.render({
         itemCount: itemCount,

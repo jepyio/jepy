@@ -2,8 +2,7 @@
  * @enum {String}
  */
 const Prefix = {
-    ESCAPED: '$',
-    RAW: '%',
+    PARAMETER: '%',
 };
 
 /**

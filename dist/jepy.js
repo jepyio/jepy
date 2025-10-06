@@ -306,8 +306,7 @@ var jepy = (function () {
      * @enum {String}
      */
     const Prefix = {
-        ESCAPED: '$',
-        RAW: '%',
+        PARAMETER: '%',
     };
 
     /**
@@ -352,6 +351,8 @@ var jepy = (function () {
         LOWER: 'lower',
         CAPITALIZE: 'capitalize',
         TRIM: 'trim',
+        ESCAPE: 'esc',
+        ESCAPE_SHORT: 'e',
     };
     /**
      * @enum {String}
@@ -403,17 +404,17 @@ var jepy = (function () {
         render(params = {}) {
             let content = this.#content;
             const tagPattern = new RegExp(
-                '(?<indent>[ \\t]*)(?<placeholder>(?<prefix>[\\' +
-                    Object.values(Prefix).join('\\') +
-                    '])\\' +
+                '(?<indent>[ \\t]*)(?<placeholder>\\' +
+                    Prefix.PARAMETER +
+                    '\\' +
                     Bracket.OPEN +
                     '(?<path>[^\\' +
                     Bracket.CLOSE +
                     '\\|]*)(\\' +
                     Glue.FILTER +
-                    '(?<filter>[^\\' +
+                    '(?<filters>[^\\' +
                     Bracket.CLOSE +
-                    '\\|]+))?\\' +
+                    ']+))?\\' +
                     Bracket.CLOSE +
                     ')',
                 'm',
@@ -421,13 +422,13 @@ var jepy = (function () {
             let tag;
             while ((tag = tagPattern.exec(content))) {
                 let param = this.#paramFromPath(tag.groups.path, params);
-                if (tag.groups.filter) {
-                    param = this.#applyFilter(tag.groups.filter, param);
+                if (tag.groups.filters) {
+                    const filters = tag.groups.filters.split(Glue.FILTER);
+                    for (const filter of filters) {
+                        param = this.#applyFilter(filter, param);
+                    }
                 }
                 if (typeof param === 'string') {
-                    if (tag.groups.prefix === Prefix.ESCAPED) {
-                        param = this.#escape(param);
-                    }
                     if (tag.groups.indent && param.includes('\n')) {
                         param = param.replace(new RegExp('\\n', 'g'), '\n' + tag.groups.indent);
                     }
@@ -454,6 +455,9 @@ var jepy = (function () {
                 return param.at(0).toUpperCase() + param.slice(1);
             case StringFilter.TRIM:
                 return param.trim();
+            case StringFilter.ESCAPE:
+            case StringFilter.ESCAPE_SHORT:
+                return this.#escape(param);
             case NumberFilter.ABS:
                 return Math.abs(parseFloat(param));
             case NumberFilter.ROUND:
@@ -506,10 +510,13 @@ var jepy = (function () {
         }
 
         /**
-         * @param {String} text
-         * @return {String}
+         * @param {*} text
+         * @return {*}
          */
         #escape(text) {
+            if (typeof text !== 'string') {
+                return text;
+            }
             return text
                 .replace(/([<>&]|[^#-~| |!])/g, (match) => '&#' + match.charCodeAt(0) + ';')
                 .replace(
@@ -554,7 +561,7 @@ var jepy = (function () {
                 const blockId = 'block_' + counter;
                 counter++;
                 const blockPlaceholder =
-                    Prefix.RAW + Bracket.OPEN + Operator.PARTIAL + blockId + Bracket.CLOSE;
+                    Prefix.PARAMETER + Bracket.OPEN + Operator.PARTIAL + blockId + Bracket.CLOSE;
                 this.#content = this.#content.replace(block[0], blockPlaceholder);
                 blockPartials[blockId] = this.#blockCallback(block);
             }

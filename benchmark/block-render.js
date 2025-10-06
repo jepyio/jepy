@@ -1,7 +1,7 @@
 import {run, bench} from 'mitata';
 import jepy from '../src/index.js';
 
-const repeatingBlockTemplate = new jepy.Template('#{items}${name}#{/items}');
+const repeatingBlockTemplate = new jepy.Template('#{items}%{name|esc}#{/items}');
 let items = [];
 for (let i = 0; i < 1000; i++) {
     items.push({
@@ -15,7 +15,7 @@ bench('repeating block', () =>
 );
 
 const repeatingBlockWithAliasTemplate = new jepy.Template(
-    '#{arrayItems:item}${item}#{/arrayItems}',
+    '#{arrayItems:item}%{item|esc}#{/arrayItems}',
 );
 let arrayItems = [];
 for (let i = 0; i < 1000; i++) {
@@ -29,7 +29,7 @@ bench('repeating block with alias', () =>
 
 let placeholderStressTestTemplateString = '';
 for (let i = 0; i < 1000; i++) {
-    placeholderStressTestTemplateString += '${test}%{test}${@test}%{@test}';
+    placeholderStressTestTemplateString += '%{test|esc}%{test}%{@test|esc}%{@test}';
 }
 const placeholderStressTestTemplate = new jepy.Template(placeholderStressTestTemplateString, {
     test: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla scelerisque metus at quam auctor accumsan.',
@@ -54,21 +54,21 @@ bench('indented block', () =>
 
 const complexTemplate = new jepy.Template(
     `
-\${value}
+%{value|esc}
                 %{value}
  %{@value}
- \${@value}
+ %{@value|esc}
 Fusce nisi neque, cursus quis justo vel, vulputate molestie massa. Suspendisse ut dignissim risus. Proin nunc velit, egestas nec congue at, volutpat luctus justo. Suspendisse pulvinar scelerisque euismod. Proin vitae nulla risus. Mauris a feugiat est, imperdiet maximus lorem. Nam placerat, libero ac facilisis condimentum, urna dui accumsan nibh, in tristique tortor velit ut nibh.
-_{spaceIndented:20}\${multiLine}_{/spaceIndented}
->{tabIndented:10}\${multiLine}>{/tabIndented}%{@value}
+_{spaceIndented:20}%{multiLine}_{/spaceIndented}
+>{tabIndented:10}%{multiLine}>{/tabIndented}%{@value}
 ?{value}a?{!value}a?{/value}
 ?{items}a?{!items}a?{/items}
 ?{arrayItems}a?{!arrayItems}a?{/arrayItems}
 ?{@true}a?{!@true}a?{/@true}
 ?{@number}a?{!@number}a?{/@number}
 ?{@value}a?{!@value}a?{/@value}
-#{items}\${name}#{/items}
-#{arrayItems:item}\${item}#{/arrayItems}
+#{items}%{name|esc}#{/items}
+#{arrayItems:item}%{item|esc}#{/arrayItems}
 ={cachedBlock}cached block ={/cachedBlock}={cachedBlock}={/cachedBlock}={cachedBlock}={/cachedBlock}
 `,
     {

@@ -12,6 +12,8 @@ const StringFilter = {
     LOWER: 'lower',
     CAPITALIZE: 'capitalize',
     TRIM: 'trim',
+    ESCAPE: 'esc',
+    ESCAPE_SHORT: 'e',
 };
 /**
  * @enum {String}
